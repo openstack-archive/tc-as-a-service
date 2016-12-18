@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Red Hat, Inc.
+# Copyright (c) 2016 Huawei, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -38,3 +38,5 @@ class OvsdbIdlTestCase(base.BaseTestCase):
     def add_queue(self):
         print (cmd.AddQueue(self.ovsdb_idl, 'enp1s0f1', 1, '1000000', '1000000')
                .execute())
+
+
