@@ -25,12 +25,18 @@ from neutron import service as neutron_service
 from wan_qos.common import topics
 
 WANQOS_OPTS = [
-    cfg.StrOpt('lan_port',
+    cfg.StrOpt('lan_port_name',
                default='eth0',
-               help="The name of the port facing teh LAN"),
-    cfg.StrOpt('wan_port',
+               help="The name of the port facing the LAN"),
+    cfg.StrOpt('lan_max_rate',
+               default='10mbit',
+               help="The maximum rate of the LAN port"),
+    cfg.StrOpt('wan_port_name',
                default='eth1',
-               help="The name of the port facing the WAN")
+               help="The name of the port facing the WAN"),
+    cfg.StrOpt('wan_max_rate',
+               default='10mbit',
+               help="The maximum rate of the WAN port")
 ]
 
 

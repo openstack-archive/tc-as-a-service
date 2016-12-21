@@ -25,16 +25,26 @@ class TcAgentManager:
     def __init__(self, host, conf=None):
         self.agent = tc_driver.TcDriver()
         if not conf:
-            conf = cfg.CONF
-        lan_port = conf.WANQOS.lan_port
-        wan_port = conf.WANQOS.wan_port
+            self.conf = cfg.CONF
+        else:
+            self.conf = conf
+        lan_port = self.conf.WANQOS.lan_port_name
+        wan_port = self.conf.WANQOS.wan_port_name
         self.agent.set_ports(lan_port, wan_port)
 
     def init_host(self):
-        """Handle initialization if this is a standalone service.
+        self.agent.clear_all()
+        tc_dict = {
+            'port_side': 'lan_port',
+            'max_rate': self.conf.WANQOS.lan_max_rate
+        }
+        self.agent.set_root_queue(tc_dict)
+        tc_dict = {
+            'port_side': 'wan_port',
+            'max_rate': self.conf.WANQOS.wan_max_rate
+        }
+        self.agent.set_root_queue(tc_dict)
 
-        """
-        pass
 
     def after_start(self):
         LOG.info("WAN QoS agent started")

@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from subprocess import call
 from subprocess import check_call
 
 from oslo_config import cfg
@@ -33,7 +34,7 @@ class TcDriver(agent_api.AgentInterface):
 
     def clear_all(self):
         for port in self.ports.values():
-            check_call('sudo tc qdisc del dev %s root' % port, shell=True)
+            call('sudo tc qdisc del dev %s root' % port, shell=True)
 
     def set_root_queue(self, tc_dict):
         check_call('sudo tc qdisc add dev %s handle 1: root htb' %
