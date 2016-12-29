@@ -13,5 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-WAN_QOS = 'WAN_QOS'
-WANQOS = 'wanqos'
+WANQOS = 'WANQOS'
+WAN_QOS = 'wan_qos'
+WAN_QOS_PATH = 'wan-qos'

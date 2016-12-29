@@ -21,8 +21,6 @@ from oslo_log import log as logging
 from oslo_utils import importutils
 import oslo_messaging as messaging
 
-from neutron.services import service_base
-
 from wan_qos.common import api
 from wan_qos.common import constants
 from wan_qos.common import topics
@@ -44,19 +42,10 @@ class PluginRpcCallback(object):
         self.plugin.agent_up_notification(host)
 
 
-class WanQosDriver(service_base.ServicePluginBase):
-    def get_plugin_description(self):
-        pass
-
-    def get_plugin_type(self):
-        pass
-
-    @property
-    def service_type(self):
-        return 'wan_qos'
-
-
 class WanQosPlugin(wanqos.WanQosPluginBase):
+
+    supported_extension_aliases = ["wan-qos"]
+
     def __init__(self):
         rpc_callback = importutils.import_object(
             'wan_qos.services.plugin.PluginRpcCallback', self)
