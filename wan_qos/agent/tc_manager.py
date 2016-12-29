@@ -15,22 +15,33 @@
 
 from oslo_config import cfg
 from oslo_log import log as logging
+import oslo_messaging as messaging
+
+from neutron import context as ctx
 
 from wan_qos.agent import tc_driver
+from wan_qos.common import api
+from wan_qos.common import topics
 
 LOG = logging.getLogger(__name__)
 
 
 class TcAgentManager:
-    def __init__(self, host, conf=None):
+
+    target = messaging.Target(version='1.0')
+
+    def __init__(self, host=None, conf=None):
         self.agent = tc_driver.TcDriver()
         if not conf:
             self.conf = cfg.CONF
         else:
             self.conf = conf
+        if not host:
+            host = self.conf.host
         lan_port = self.conf.WANQOS.lan_port_name
         wan_port = self.conf.WANQOS.wan_port_name
         self.agent.set_ports(lan_port, wan_port)
+        self.plugin_rpc = api.TcPluginApi(host, topics.TC_PLUGIN)
 
     def init_host(self):
         self.agent.clear_all()
@@ -45,9 +56,9 @@ class TcAgentManager:
         }
         self.agent.set_root_queue(tc_dict)
 
-
     def after_start(self):
         LOG.info("WAN QoS agent started")
 
     def periodic_tasks(self, context, raise_on_error=False):
-        pass
+        LOG.info(
+            self.plugin_rpc.agent_up_notification(ctx.get_admin_context()))

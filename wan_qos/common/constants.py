@@ -13,3 +13,5 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+WAN_QOS = 'WAN_QOS'
+WANQOS = 'wanqos'

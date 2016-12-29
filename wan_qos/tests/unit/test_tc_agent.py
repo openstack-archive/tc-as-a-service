@@ -12,14 +12,40 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from wan_qos.agent import tc_driver
+import time
 
 from neutron.tests import base
+
+from oslo_config import cfg
+
+from wan_qos.agent import tc_driver
+from wan_qos.agent import tc_manager
+from wan_qos.services import plugin
+
+wanqos_group = cfg.OptGroup(name='WANQOS',
+                            title='WAN QoS options')
+
+opts = [
+    cfg.StrOpt('lan_port_name',
+               default='enp1s0f0',
+               help='LAN side port name'),
+    cfg.StrOpt('lan_max_rate',
+               default='100mbit',
+               help='LAN side port rate'),
+    cfg.StrOpt('wan_port_name',
+               default='enp1s0f1',
+               help='WAN side port name'),
+    cfg.StrOpt('wan_max_rate',
+               default='100mbit',
+               help='WAN side port rate')
+]
 
 
 class TestTcDriver(base.BaseTestCase):
     def setUp(self):
         super(TestTcDriver, self).setUp()
+        cfg.CONF.register_group(wanqos_group)
+        cfg.CONF.register_opts(opts, group='WANQOS')
         self.tc_agent = tc_driver.TcDriver()
         self.tc_agent.set_ports('enp1s0f0', 'enp1s0f1')
 
@@ -112,3 +138,14 @@ class TestTcDriver(base.BaseTestCase):
             'child': '10'
         }
         self.tc_agent.remove_traffic_limiter(tc_dict)
+
+
+class TestApiMessages(base.BaseTestCase):
+    def setUp(self):
+        super(TestApiMessages, self).setUp()
+        cfg.CONF.register_group(wanqos_group)
+        cfg.CONF.register_opts(opts, group='WANQOS')
+        self.plugin = plugin.WanQosPlugin()
+
+
+

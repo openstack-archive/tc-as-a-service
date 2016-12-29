@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+
+import time
 import sys
 
 from oslo_config import cfg
@@ -23,32 +25,15 @@ from neutron.common import config as common_config
 from neutron import service as neutron_service
 
 from wan_qos.common import topics
-
-WANQOS_OPTS = [
-    cfg.StrOpt('lan_port_name',
-               default='eth0',
-               help="The name of the port facing the LAN"),
-    cfg.StrOpt('lan_max_rate',
-               default='10mbit',
-               help="The maximum rate of the LAN port"),
-    cfg.StrOpt('wan_port_name',
-               default='eth1',
-               help="The name of the port facing the WAN"),
-    cfg.StrOpt('wan_max_rate',
-               default='10mbit',
-               help="The maximum rate of the WAN port")
-]
+from wan_qos.services import plugin
 
 
 def main():
-    cfg.CONF.register_opts(WANQOS_OPTS,'WANQOS')
     common_config.init(sys.argv[1:])
     config.setup_logging()
-    server = neutron_service.Service.create(
-        topic=topics.TC_AGENT,
-        report_interval=10,
-        manager='wan_qos.agent.tc_manager.TcAgentManager')
-    service.launch(cfg.CONF, server).wait()
+    wanqos_plugin = plugin.WanQosPlugin()
+    while True:
+        time.sleep(3)
 
 if __name__ == '__main__':
     main()

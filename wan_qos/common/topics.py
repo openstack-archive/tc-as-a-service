@@ -13,5 +13,5 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-TC_AGENT = 'wan_tc_agent'
-TC_PLUGIN = 'wan_tc_plugin'
+TC_AGENT = 'wan_qos_agent'
+TC_PLUGIN = 'wan_qos_plugin'
