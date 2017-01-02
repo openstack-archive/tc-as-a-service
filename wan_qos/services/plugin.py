@@ -44,7 +44,7 @@ class PluginRpcCallback(object):
 
 class WanQosPlugin(wanqos.WanQosPluginBase):
 
-    supported_extension_aliases = ["wan-qos"]
+    supported_extension_aliases = ["wan-tc"]
 
     def __init__(self):
         rpc_callback = importutils.import_object(
@@ -66,19 +66,21 @@ class WanQosPlugin(wanqos.WanQosPluginBase):
         """Get description of the plugin."""
         return 'Plugin for rate limiting on WAN links.'
 
-    def get_wan_qos(self, id):
+    def get_wan_tc(self, context, id, fields=None):
         pass
 
-    def get_wan_qoss(self):
+    def get_wan_tcs(self, context, filters=None, fields=None,
+                    sorts=None, limit=None, marker=None,
+                    page_reverse=False):
         pass
 
-    def delete_wan_qos(self, context, id):
+    def delete_wan_tc(self, context, id):
         pass
 
-    def update_wan_qos(self, context, id, wan_qos):
+    def update_wan_tc(self, context, id, wan_qos):
         pass
 
-    def create_wan_qos(self, context, wan_qos):
+    def create_wan_tc(self, context, wan_qos):
         pass
         # self.agent_rpc.create_wan_qos(context, wan_qos)
 

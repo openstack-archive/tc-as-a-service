@@ -49,7 +49,7 @@ class Wanqos(extensions.ExtensionDescriptor):
 
     @classmethod
     def get_alias(cls):
-        return "wan-qos"
+        return "wan-tc"
 
     @classmethod
     def get_description(cls):
@@ -85,21 +85,23 @@ class Wanqos(extensions.ExtensionDescriptor):
 class WanQosPluginBase(object):
 
     @abc.abstractmethod
-    def create_wan_qos(self, context, wan_qos):
+    def create_wan_tc(self, context, wan_qos):
         pass
 
     @abc.abstractmethod
-    def get_wan_qos(self, id):
+    def get_wan_tc(self, context, id, fields=None):
         pass
 
     @abc.abstractmethod
-    def get_wan_qoss(self):
+    def get_wan_tcs(self, context, filters=None, fields=None,
+                    sorts=None, limit=None, marker=None,
+                    page_reverse=False):
         pass
 
     @abc.abstractmethod
-    def update_wan_qos(self, context, id, wan_qos):
+    def update_wan_tc(self, context, id, wan_qos):
         pass
 
     @abc.abstractmethod
-    def delete_wan_qos(self, context, id):
+    def delete_wan_tc(self, context, id):
         pass

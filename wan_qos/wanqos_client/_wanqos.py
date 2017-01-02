@@ -19,7 +19,7 @@ from wan_qos.common import constants
 
 
 def args2body(self, parsed_args):
-    body = {'wan_qos': {}, }
+    body = {'wan_tc': {}, }
     return body
 
 

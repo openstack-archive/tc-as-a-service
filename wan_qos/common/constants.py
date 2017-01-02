@@ -14,5 +14,5 @@
 #    under the License.
 
 WANQOS = 'WANQOS'
-WAN_QOS = 'wan_qos'
-WAN_QOS_PATH = 'wan-qos'
+WAN_QOS = 'wan_tc'
+WAN_QOS_PATH = 'wan-tcs'
