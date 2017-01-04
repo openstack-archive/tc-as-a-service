@@ -28,9 +28,7 @@ class WanTcClass(model_base.BASEV2,
     network_id = sa.Column(sa.String(36),
                            sa.ForeignKey('networks.id',
                                          ondelete='CASCADE'),
-                           nullable=False,
-                           unique=True,
-                           primary_key=True)
+                           nullable=False)
     min_rate = sa.Column(sa.String(15), nullable=False)
     max_rate = sa.Column(sa.String(15))
 
@@ -41,8 +39,7 @@ class WanTcSelector(model_base.BASEV2,
     class_id = sa.Column(sa.String(36),
                          sa.ForeignKey('wan_tc_class.id',
                                        ondelete='CASCADE'),
-                         nullable=False,
-                         primary_key=True)
+                         nullable=False)
     protocol = sa.Column(sa.String(15))
     match = sa.Column(sa.String(15))
 
