@@ -13,6 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-WANTC = 'WANTC'
-WAN_TC = 'wan_tc'
-WAN_TC_PATH = 'wan-tcs'
+from oslo_utils import uuidutils
+
+from wan_qos.db.models import wan_tc as model
+from wan_qos.common import constants
+
+
+class WanTcDb():
+    def create_wan_tc_class(self, context, wan_qos_class):
+        pass

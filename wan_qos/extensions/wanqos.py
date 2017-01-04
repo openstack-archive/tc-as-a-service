@@ -21,7 +21,7 @@ from neutron.api.v2 import resource_helper
 from wan_qos.common import constants
 
 RESOURCE_ATTRIBUTE_MAP = {
-    constants.WAN_QOS_PATH: {
+    constants.WAN_TC_PATH: {
         'id': {'allow_post': False, 'allow_put': False,
                'is_visible': True},
         'max_rate': {'allow_post': True, 'allow_put': False,
@@ -45,7 +45,7 @@ class Wanqos(extensions.ExtensionDescriptor):
 
     @classmethod
     def get_name(cls):
-        return "WAN QoS"
+        return "WAN Traffic Control"
 
     @classmethod
     def get_alias(cls):
@@ -68,7 +68,7 @@ class Wanqos(extensions.ExtensionDescriptor):
             {}, RESOURCE_ATTRIBUTE_MAP)
         resources = resource_helper.build_resource_info(plural_mappings,
                                                         RESOURCE_ATTRIBUTE_MAP,
-                                                        constants.WANQOS,
+                                                        constants.WANTC,
                                                         action_map=mem_actions,
                                                         register_quota=True,
                                                         translate_name=True)

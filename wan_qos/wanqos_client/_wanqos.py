@@ -19,35 +19,35 @@ from wan_qos.common import constants
 
 
 def args2body(self, parsed_args):
-    body = {'wan_tc': {}, }
+    body = {constants.WAN_TC: {}, }
     return body
 
 
-class WanQos(extension.NeutronClientExtension):
-    resource = constants.WAN_QOS
-    resource_plural = '%ss' % constants.WAN_QOS
-    path = constants.WAN_QOS_PATH
+class WanTc(extension.NeutronClientExtension):
+    resource = constants.WAN_TC
+    resource_plural = '%ss' % constants.WAN_TC
+    path = constants.WAN_TC_PATH
     object_path = '/%s' % path
     resource_path = '/%s/%%s' % path
     versions = ['2.0']
 
 
-class WanQosShow(extension.ClientExtensionShow, WanQos):
+class WanTcShow(extension.ClientExtensionShow, WanTc):
 
-    shell_command = 'wan-qos-show'
+    shell_command = 'wan-tc-show'
 
 
-class WanQosList(extension.ClientExtensionList, WanQos):
+class WanTcList(extension.ClientExtensionList, WanTc):
 
-    shell_command = 'wan-qos-list'
+    shell_command = 'wan-tc-list'
     list_columns = ['id', 'name', 'network']
     pagination_support = True
     sorting_support = True
 
 
-class WanQosCreate(extension.ClientExtensionCreate, WanQos):
+class WanTcCreate(extension.ClientExtensionCreate, WanTc):
 
-    shell_command = 'wan-qos-create'
+    shell_command = 'wan-tc-create'
 
     def add_known_arguments(self, parser):
         pass
@@ -59,14 +59,14 @@ class WanQosCreate(extension.ClientExtensionCreate, WanQos):
         return body
 
 
-class WanQosDelete(extension.ClientExtensionDelete, WanQos):
+class WanTcDelete(extension.ClientExtensionDelete, WanTc):
 
-    shell_command = 'wan-qos-delete'
+    shell_command = 'wan-tc-delete'
 
 
-class WanQosUpdate(extension.ClientExtensionUpdate, WanQos):
+class WanTcUpdate(extension.ClientExtensionUpdate, WanTc):
 
-    shell_command = 'wan-qos-update'
+    shell_command = 'wan-tc-update'
 
     def add_known_arguments(self, parser):
         pass

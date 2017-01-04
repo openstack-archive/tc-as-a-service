@@ -15,10 +15,12 @@
 
 from neutron.common import rpc as n_rpc
 from neutron.db import agents_db
+from neutron_lib import exceptions
 
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_utils import importutils
+
 import oslo_messaging as messaging
 
 from wan_qos.common import api
@@ -60,7 +62,7 @@ class WanQosPlugin(wanqos.WanQosPluginBase):
 
     def get_plugin_type(self):
         """Get type of the plugin."""
-        return constants.WANQOS
+        return constants.WANTC
 
     def get_plugin_description(self):
         """Get description of the plugin."""
@@ -84,6 +86,26 @@ class WanQosPlugin(wanqos.WanQosPluginBase):
         pass
         # self.agent_rpc.create_wan_qos(context, wan_qos)
 
-    def agent_up_notification(self, host):
+        tenant_id = self._get_tenant_id_for_create(context, wan_qos_class)
+
+
+
+    @staticmethod
+    def _get_tenant_id_for_create(self, context, resource):
+        """Get tenant id for creation of resources."""
+        if context.is_admin and 'tenant_id' in resource:
+            tenant_id = resource['tenant_id']
+        elif ('tenant_id' in resource and
+                      resource['tenant_id'] != context.tenant_id):
+            reason = 'Cannot create resource for another tenant'
+            raise exceptions.AdminRequired(reason=reason)
+        else:
+            tenant_id = context.tenant_id
+        return tenant_id
+
+
+
+
+def agent_up_notification(self, host):
         LOG.debug('agent %s is up' % host)
         return 'OK'
