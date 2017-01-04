@@ -15,10 +15,13 @@
 
 from oslo_utils import uuidutils
 
-from wan_qos.db.models import wan_tc as model
+from wan_qos.db.models import wan_tc as models
 from wan_qos.common import constants
 
 
-class WanTcDb():
+class WanTcDb(object):
     def create_wan_tc_class(self, context, wan_qos_class):
         pass
+
+    def get_all_classes(self, context):
+        return context.session.query(models.WanTcClass).all()
