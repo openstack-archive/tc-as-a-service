@@ -33,8 +33,13 @@ class TcPluginApi(object):
             'lan_port': ports['lan_port'],
             'wan_port': ports['wan_port']
         }
-        return cctxt.cast(context, 'agent_up_notification',
-                          host_info=host_info)
+        cctxt.cast(context, 'agent_up_notification',
+                   host_info=host_info)
+
+    def device_heartbeat(self, context, host):
+        cctxt = self.client.prepare()
+        cctxt.cast(context, 'device_heartbeat',
+                   host=host)
 
     def get_configuration_from_db(self, context):
         cctxt = self.client.prepare()
