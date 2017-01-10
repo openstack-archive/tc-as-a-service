@@ -44,11 +44,15 @@ class PluginRpcCallback(object):
         LOG.debug('got up notification from %s' % host_info['host'])
         self.plugin.agent_up_notification(context, host_info)
 
+    def device_heartbeat(self, context, host):
+        self.plugin.db.device_heartbeat(context, host)
+
 
 class WanQosPlugin(wanqos.WanQosPluginBase):
     supported_extension_aliases = ["wan-tc"]
 
     def __init__(self):
+        self.db = wan_qos_db.WanTcDb()
         rpc_callback = importutils.import_object(
             'wan_qos.services.plugin.PluginRpcCallback', self)
         endpoints = (
@@ -59,8 +63,6 @@ class WanQosPlugin(wanqos.WanQosPluginBase):
                                   endpoints,
                                   fanout=False)
         self.conn.consume_in_threads()
-
-        self.db = wan_qos_db.WanTcDb()
 
     def get_plugin_type(self):
         """Get type of the plugin."""

@@ -33,19 +33,26 @@ class WanTcDb(object):
             if not device:
                 LOG.debug('New device connected: %s' % host_info)
                 wan_tc_device = models.WanTcDevice(
-                    id = uuidutils.generate_uuid(),
-                    host = host_info['host'],
-                    lan_port = host_info['lan_port'],
-                    wan_port = host_info['wan_port'],
-                    uptime = timeutils.utcnow()
+                    id=uuidutils.generate_uuid(),
+                    host=host_info['host'],
+                    lan_port=host_info['lan_port'],
+                    wan_port=host_info['wan_port'],
+                    uptime=timeutils.utcnow()
                 )
                 context.session.add(wan_tc_device)
             else:
                 LOG.debug('updating uptime for device: %s' % host_info['host'])
                 device.uptime = timeutils.utcnow()
 
-    def device_heartbeat(self, context, device_info):
-        pass
+    def device_heartbeat(self, context, host):
+        device = context.session.query(models.WanTcDevice).filter_by(
+            host=host
+        ).first()
+        if device:
+            with context.session.begin(subtransactions=True):
+                device.heartbeat_timestamp = timeutils.utcnow()
+        else:
+            LOG.error('Got heartbeat for non-existing device: %s' % host)
 
     def create_wan_tc_class(self, context, wan_qos_class):
         pass

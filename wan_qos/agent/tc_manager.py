@@ -37,6 +37,8 @@ class TcAgentManager:
             self.conf = conf
         if not host:
             self.host = self.conf.host
+        else:
+            self.host = host
         lan_port = self.conf.WANTC.lan_port_name
         wan_port = self.conf.WANTC.wan_port_name
         self.agent.set_ports(lan_port, wan_port)
@@ -62,3 +64,4 @@ class TcAgentManager:
 
     def periodic_tasks(self, context, raise_on_error=False):
         LOG.info("periodic task")
+        self.plugin_rpc.device_heartbeat(context, self.host)
