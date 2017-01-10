@@ -31,6 +31,9 @@ class TcDriver(agent_api.AgentInterface):
         self.ports['lan_port'] = lan_port
         self.ports['wan_port'] = wan_port
 
+    def get_ports(self):
+        return self.ports
+
     def clear_all(self):
         for port in self.ports.values():
             call('sudo tc qdisc del dev %s root' % port, shell=True)

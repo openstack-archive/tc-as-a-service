@@ -26,9 +26,15 @@ class TcPluginApi(object):
         target = oslo_messaging.Target(topic=topic, version='1.0')
         self.client = n_rpc.get_client(target)
 
-    def agent_up_notification(self, context):
+    def agent_up_notification(self, context, ports):
         cctxt = self.client.prepare()
-        return cctxt.cast(context, 'agent_up_notification', host=self.host)
+        host_info = {
+            'host': self.host,
+            'lan_port': ports['lan_port'],
+            'wan_port': ports['wan_port']
+        }
+        return cctxt.cast(context, 'agent_up_notification',
+                          host_info=host_info)
 
     def get_configuration_from_db(self, context):
         cctxt = self.client.prepare()
@@ -46,4 +52,3 @@ class TcAgentApi(object):
         return cctxt.call(context,
                           'create_wan_qos',
                           wan_qos_dict)
-

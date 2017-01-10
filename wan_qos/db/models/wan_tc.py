@@ -13,13 +13,29 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from neutron_lib.db import model_base
 import sqlalchemy as sa
+
+
+from neutron_lib.db import model_base
+
+
+class WanTcDevice(model_base.BASEV2,
+                  model_base.HasId):
+    __tablename__ = 'wan_tc_device'
+    host = sa.Column(sa.String(100), nullable=False)
+    lan_port = sa.Column(sa.String(15), nullable=False)
+    wan_port = sa.Column(sa.String(15), nullable=False)
+    uptime = sa.Column(sa.DateTime())
+    heartbeat_timestamp = sa.Column(sa.DateTime())
 
 
 class WanTcClass(model_base.BASEV2,
                   model_base.HasId, model_base.HasProject):
     __tablename__ = 'wan_tc_class'
+    device_id = sa.Column(sa.String(36),
+                           sa.ForeignKey('wan_tc_device.id',
+                                         ondelete='CASCADE'),
+                           nullable=False)
     class_ext_id = sa.Column(sa.Integer)
     parent_class = sa.Column(sa.String(36),
                              sa.ForeignKey('wan_tc_class.id',

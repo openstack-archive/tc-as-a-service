@@ -27,7 +27,6 @@ LOG = logging.getLogger(__name__)
 
 
 class TcAgentManager:
-
     target = messaging.Target(version='1.0')
 
     def __init__(self, host=None, conf=None):
@@ -37,11 +36,13 @@ class TcAgentManager:
         else:
             self.conf = conf
         if not host:
-            host = self.conf.host
+            self.host = self.conf.host
         lan_port = self.conf.WANQOS.lan_port_name
         wan_port = self.conf.WANQOS.wan_port_name
         self.agent.set_ports(lan_port, wan_port)
         self.plugin_rpc = api.TcPluginApi(host, topics.TC_PLUGIN)
+        self.plugin_rpc.agent_up_notification(ctx.get_admin_context(),
+                                              self.agent.get_ports())
 
     def init_host(self):
         self.agent.clear_all()
@@ -60,5 +61,4 @@ class TcAgentManager:
         LOG.info("WAN QoS agent started")
 
     def periodic_tasks(self, context, raise_on_error=False):
-        LOG.info(
-            self.plugin_rpc.agent_up_notification(ctx.get_admin_context()))
+        LOG.info("periodic task")

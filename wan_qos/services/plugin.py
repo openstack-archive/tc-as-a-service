@@ -40,9 +40,9 @@ class PluginRpcCallback(object):
         self.plugin = plugin
         LOG.debug('rpc callback started.')
 
-    def agent_up_notification(self, context, host):
-        LOG.debug('got up notification from %s' % host)
-        self.plugin.agent_up_notification(host)
+    def agent_up_notification(self, context, host_info):
+        LOG.debug('got up notification from %s' % host_info['host'])
+        self.plugin.agent_up_notification(context, host_info)
 
 
 class WanQosPlugin(wanqos.WanQosPluginBase):
@@ -103,7 +103,6 @@ class WanQosPlugin(wanqos.WanQosPluginBase):
             tenant_id = context.tenant_id
         return tenant_id
 
-
-def agent_up_notification(self, host):
-    LOG.debug('agent %s is up' % host)
-    return 'OK'
+    def agent_up_notification(self, context, host_info):
+        LOG.debug('agent %s is up' % host_info['host'])
+        self.db.agent_up_notification(context, host_info)

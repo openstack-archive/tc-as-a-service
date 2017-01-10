@@ -61,3 +61,13 @@ def upgrade():
         'wan_tc_selector', 'wan_tc_class',
         ['class_id'], ['id'],
     )
+
+    op.create_table(
+        'wan_tc_device',
+        sa.Column('id', sa.String(length=36), nullable=False),
+        sa.Column('host', sa.String(100), nullable=False),
+        sa.Column('lan_port', sa.String(15), nullable=False),
+        sa.Column('wan_port', sa.String(15), nullable=False),
+        sa.Column('uptime', sa.DateTime()),
+        sa.Column('heartbeat_timestamp', sa.DateTime())
+    )
