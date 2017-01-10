@@ -24,7 +24,7 @@ from neutron import service as neutron_service
 
 from wan_qos.common import topics
 
-WANQOS_OPTS = [
+WANTC_OPTS = [
     cfg.StrOpt('lan_port_name',
                default='eth0',
                help="The name of the port facing the LAN"),
@@ -41,7 +41,7 @@ WANQOS_OPTS = [
 
 
 def main():
-    cfg.CONF.register_opts(WANQOS_OPTS,'WANQOS')
+    cfg.CONF.register_opts(WANTC_OPTS, 'WANTC')
     common_config.init(sys.argv[1:])
     config.setup_logging()
     server = neutron_service.Service.create(

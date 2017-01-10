@@ -22,7 +22,7 @@ from wan_qos.agent import tc_driver
 from wan_qos.agent import tc_manager
 from wan_qos.services import plugin
 
-wanqos_group = cfg.OptGroup(name='WANQOS',
+WANTC_group = cfg.OptGroup(name='WANTC',
                             title='WAN QoS options')
 
 opts = [
@@ -44,8 +44,8 @@ opts = [
 class TestTcDriver(base.BaseTestCase):
     def setUp(self):
         super(TestTcDriver, self).setUp()
-        cfg.CONF.register_group(wanqos_group)
-        cfg.CONF.register_opts(opts, group='WANQOS')
+        cfg.CONF.register_group(WANTC_group)
+        cfg.CONF.register_opts(opts, group='WANTC')
         self.tc_agent = tc_driver.TcDriver()
         self.tc_agent.set_ports('enp1s0f0', 'enp1s0f1')
 
@@ -143,9 +143,9 @@ class TestTcDriver(base.BaseTestCase):
 class TestApiMessages(base.BaseTestCase):
     def setUp(self):
         super(TestApiMessages, self).setUp()
-        cfg.CONF.register_group(wanqos_group)
-        cfg.CONF.register_opts(opts, group='WANQOS')
-        self.plugin = plugin.WanQosPlugin()
+        cfg.CONF.register_group(WANTC_group)
+        cfg.CONF.register_opts(opts, group='WANTC')
+        self.plugin = plugin.WANTCPlugin()
 
 
 

@@ -37,8 +37,8 @@ class TcAgentManager:
             self.conf = conf
         if not host:
             self.host = self.conf.host
-        lan_port = self.conf.WANQOS.lan_port_name
-        wan_port = self.conf.WANQOS.wan_port_name
+        lan_port = self.conf.WANTC.lan_port_name
+        wan_port = self.conf.WANTC.wan_port_name
         self.agent.set_ports(lan_port, wan_port)
         self.plugin_rpc = api.TcPluginApi(host, topics.TC_PLUGIN)
         self.plugin_rpc.agent_up_notification(ctx.get_admin_context(),
@@ -48,12 +48,12 @@ class TcAgentManager:
         self.agent.clear_all()
         tc_dict = {
             'port_side': 'lan_port',
-            'max_rate': self.conf.WANQOS.lan_max_rate
+            'max_rate': self.conf.WANTC.lan_max_rate
         }
         self.agent.set_root_queue(tc_dict)
         tc_dict = {
             'port_side': 'wan_port',
-            'max_rate': self.conf.WANQOS.wan_max_rate
+            'max_rate': self.conf.WANTC.wan_max_rate
         }
         self.agent.set_root_queue(tc_dict)
 
