@@ -27,6 +27,7 @@ from wan_qos.common import api
 from wan_qos.common import constants
 from wan_qos.common import topics
 from wan_qos.extensions import wanqos
+from wan_qos.extensions import wantcdevice
 from wan_qos.db import wan_qos_db
 
 LOG = logging.getLogger(__name__)
@@ -48,8 +49,9 @@ class PluginRpcCallback(object):
         self.plugin.db.device_heartbeat(context, host)
 
 
-class WanQosPlugin(wanqos.WanQosPluginBase):
-    supported_extension_aliases = ["wan-tc"]
+class WanQosPlugin(wanqos.WanQosPluginBase,
+                   wantcdevice.WanTcDevicePluginBase):
+    supported_extension_aliases = ['wan-tc', 'wan-tc-device']
 
     def __init__(self):
         self.db = wan_qos_db.WanTcDb()
@@ -63,6 +65,17 @@ class WanQosPlugin(wanqos.WanQosPluginBase):
                                   endpoints,
                                   fanout=False)
         self.conn.consume_in_threads()
+
+    def delete_wan_tc_device(self, context, id):
+        self.db.delete_wan_tc_device(context, id)
+
+    def get_wan_tc_device(self, context, id, fields=None):
+        return self.db.get_device(context, id)
+
+    def get_wan_tc_devices(self, context, filters=None, fields=None,
+                           sorts=None, limit=None, marker=None,
+                           page_reverse=False):
+        return self.db.get_all_devices(context)
 
     def get_plugin_type(self):
         """Get type of the plugin."""

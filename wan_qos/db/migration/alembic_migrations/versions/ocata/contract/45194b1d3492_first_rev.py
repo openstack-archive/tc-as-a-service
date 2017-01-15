@@ -32,19 +32,24 @@ import sqlalchemy as sa
 def upgrade():
     op.create_table('wan_tc_class',
                     sa.Column('id', sa.String(length=36), nullable=False),
-                    sa.Column('networks_id', sa.String(length=36),
+                    sa.Column('parent_class', sa.String(length=36), nullable=False),
+                    sa.Column('device_id', sa.String(length=36),
+                              nullable=False),
+                    sa.Column('project_id', sa.String(length=36),
+                              nullable=False),
+                    sa.Column('network_id', sa.String(length=36),
                               nullable=False),
                     sa.Column('class_ext_id', sa.Integer()),
                     sa.Column('min_rate',
                               sa.String(length=15), nullable=False),
-                    sa.Column('min_rate', sa.String(length=15)),
+                    sa.Column('max_rate', sa.String(length=15)),
                     sa.PrimaryKeyConstraint('id')
                     )
 
     op.create_foreign_key(
         'fk_wan_tc_class_networks',
         'wan_tc_class', 'networks',
-        ['networks_id'], ['id'],
+        ['network_id'], ['id'],
     )
 
     op.create_table('wan_tc_selector',

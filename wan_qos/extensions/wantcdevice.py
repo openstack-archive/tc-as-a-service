@@ -21,43 +21,44 @@ from neutron.api.v2 import resource_helper
 from wan_qos.common import constants
 
 RESOURCE_ATTRIBUTE_MAP = {
-    constants.WAN_TC_PATH: {
+    constants.WAN_TC_DEVICE_PATH: {
         'id': {'allow_post': False, 'allow_put': False,
                'is_visible': True},
-        'max_rate': {'allow_post': True, 'allow_put': False,
-                          'validate': {'type:string': None},
-                          'is_visible': True, 'default': ''},
-        'min_rate': {'allow_post': True, 'allow_put': False,
+        'host': {'allow_post': True, 'allow_put': False,
+                 'validate': {'type:string': None},
+                 'is_visible': True, 'default': ''},
+        'lan_port': {'allow_post': True, 'allow_put': False,
                      'validate': {'type:string': None},
                      'is_visible': True, 'default': ''},
-        'network_id': {'allow_post': True, 'allow_put': False,
-                       'validate': {'type:string': None},
-                       'is_visible': True},
-        'project_id': {'allow_post': True, 'allow_put': False,
+        'wan_port': {'allow_post': True, 'allow_put': False,
+                     'validate': {'type:string': None},
+                     'is_visible': True},
+        'uptime': {'allow_post': True, 'allow_put': False,
+                   'validate': {'type:string': None},
+                   'is_visible': True},
+        'last_seen': {'allow_post': True, 'allow_put': False,
                       'validate': {'type:string': None},
-                      'required_by_policy': True,
                       'is_visible': True}
     },
 }
 
 
-class Wanqos(extensions.ExtensionDescriptor):
-
+class Wantcdevice(extensions.ExtensionDescriptor):
     @classmethod
     def get_name(cls):
-        return "WAN Traffic Control"
+        return "WAN Traffic Control device"
 
     @classmethod
     def get_alias(cls):
-        return "wan-tc"
+        return "wan-tc-device"
 
     @classmethod
     def get_description(cls):
-        return "Limit traffic on WAN links"
+        return "Device for limiting traffic on WAN links"
 
     @classmethod
     def get_updated(cls):
-        return "2016-12-01T00:00:00-00:00"
+        return "2017-01-15T00:00:00-00:00"
 
     @classmethod
     def get_resources(cls):
@@ -82,26 +83,17 @@ class Wanqos(extensions.ExtensionDescriptor):
             return {}
 
 
-class WanQosPluginBase(object):
-
+class WanTcDevicePluginBase(object):
     @abc.abstractmethod
-    def create_wan_tc(self, context, wan_qos):
+    def get_wan_tc_device(self, context, id, fields=None):
         pass
 
     @abc.abstractmethod
-    def get_wan_tc(self, context, id, fields=None):
+    def get_wan_tc_devices(self, context, filters=None, fields=None,
+                           sorts=None, limit=None, marker=None,
+                           page_reverse=False):
         pass
 
     @abc.abstractmethod
-    def get_wan_tcs(self, context, filters=None, fields=None,
-                    sorts=None, limit=None, marker=None,
-                    page_reverse=False):
-        pass
-
-    @abc.abstractmethod
-    def update_wan_tc(self, context, id, wan_qos):
-        pass
-
-    @abc.abstractmethod
-    def delete_wan_tc(self, context, id):
+    def delete_wan_tc_device(self, context, id):
         pass

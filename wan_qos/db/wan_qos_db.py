@@ -32,12 +32,14 @@ class WanTcDb(object):
         with context.session.begin(subtransactions=True):
             if not device:
                 LOG.debug('New device connected: %s' % host_info)
+                now = timeutils.utcnow()
                 wan_tc_device = models.WanTcDevice(
                     id=uuidutils.generate_uuid(),
                     host=host_info['host'],
                     lan_port=host_info['lan_port'],
                     wan_port=host_info['wan_port'],
-                    uptime=timeutils.utcnow()
+                    uptime=now,
+                    heartbeat_timestamp=now
                 )
                 context.session.add(wan_tc_device)
             else:
@@ -70,11 +72,29 @@ class WanTcDb(object):
 
     def _device_to_dict(self, device):
         device_dict = {
+            'id': device.id,
             'host': device.host,
             'lan_port': device.lan_port,
             'wan_port': device.wan_port,
             'uptime': device.uptime,
-            'heartbeat': device.heartbeat
+            'last_seen': device.heartbeat_timestamp
         }
 
         return device_dict
+
+    def delete_wan_tc_device(self, context, id):
+        device = context.session.query(models.WanTcDevice).filter_by(
+            id=id
+        ).first()
+        if device:
+            with context.session.begin(subtransactions=True):
+                context.session.delete(device)
+        else:
+            LOG.error('Trying to delete none existing device. id=%s' % id)
+
+    def get_device(self, context, id):
+        device = context.session.query(models.WanTcDevice).filter_by(
+            id=id
+        ).first()
+        if device:
+            return self._device_to_dict(device)

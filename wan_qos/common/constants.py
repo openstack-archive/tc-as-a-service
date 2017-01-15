@@ -16,3 +16,6 @@
 WANTC = 'WANTC'
 WAN_TC = 'wan_tc'
 WAN_TC_PATH = 'wan-tcs'
+
+WAN_TC_DEVICE = 'wan_tc_device'
+WAN_TC_DEVICE_PATH = 'wan-tc-devices'
