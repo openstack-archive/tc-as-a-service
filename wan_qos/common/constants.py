@@ -19,3 +19,6 @@ WAN_TC_PATH = 'wan-tcs'
 
 WAN_TC_DEVICE = 'wan_tc_device'
 WAN_TC_DEVICE_PATH = 'wan-tc-devices'
+
+WAN_TC_CLASS = 'wan_tc_class'
+WAN_TC_CLASS_PATH = 'wan-tc-classs'

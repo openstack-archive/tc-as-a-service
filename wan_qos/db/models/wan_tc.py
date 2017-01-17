@@ -15,7 +15,6 @@
 
 import sqlalchemy as sa
 
-
 from neutron_lib.db import model_base
 
 
@@ -30,32 +29,31 @@ class WanTcDevice(model_base.BASEV2,
 
 
 class WanTcClass(model_base.BASEV2,
-                  model_base.HasId, model_base.HasProject):
+                 model_base.HasId, model_base.HasProject):
     __tablename__ = 'wan_tc_class'
     device_id = sa.Column(sa.String(36),
-                           sa.ForeignKey('wan_tc_device.id',
-                                         ondelete='CASCADE'),
-                           nullable=False)
+                          sa.ForeignKey('wan_tc_device.id',
+                                        ondelete='CASCADE'),
+                          nullable=True)
+    direction = sa.Column(sa.String(4), nullable=False)
     class_ext_id = sa.Column(sa.Integer)
-    parent_class = sa.Column(sa.String(36),
-                             sa.ForeignKey('wan_tc_class.id',
-                                           ondelete='CASCADE'),
-                             nullable=True)
-    network_id = sa.Column(sa.String(36),
-                           sa.ForeignKey('networks.id',
-                                         ondelete='CASCADE'),
-                           nullable=False)
-    min_rate = sa.Column(sa.String(15), nullable=False)
-    max_rate = sa.Column(sa.String(15))
+    parent = sa.Column(sa.String(36),
+                       sa.ForeignKey('wan_tc_class.id',
+                                     ondelete='CASCADE'),
+                       nullable=True)
+    min = sa.Column(sa.String(15))
+    max = sa.Column(sa.String(15))
 
 
 class WanTcSelector(model_base.BASEV2,
-                     model_base.HasId, model_base.HasProject):
+                    model_base.HasId, model_base.HasProject):
     __tablename__ = 'wan_tc_selector'
     class_id = sa.Column(sa.String(36),
                          sa.ForeignKey('wan_tc_class.id',
                                        ondelete='CASCADE'),
                          nullable=False)
+    network_id = sa.Column(sa.String(36),
+                           sa.ForeignKey('network.id',
+                                         ondelete='CASCADE'))
     protocol = sa.Column(sa.String(15))
     match = sa.Column(sa.String(15))
-

@@ -40,7 +40,7 @@ class WanTcShow(extension.ClientExtensionShow, WanTc):
 class WanTcList(extension.ClientExtensionList, WanTc):
 
     shell_command = 'wan-tc-list'
-    list_columns = ['id', 'name', 'network']
+    list_columns = ['id', 'name', 'network', 'min-rate', 'max-rate']
     pagination_support = True
     sorting_support = True
 

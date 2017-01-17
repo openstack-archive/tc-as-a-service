@@ -26,9 +26,10 @@ import oslo_messaging as messaging
 from wan_qos.common import api
 from wan_qos.common import constants
 from wan_qos.common import topics
+from wan_qos.db import wan_qos_db
 from wan_qos.extensions import wanqos
 from wan_qos.extensions import wantcdevice
-from wan_qos.db import wan_qos_db
+from wan_qos.extensions import wantcclass
 
 LOG = logging.getLogger(__name__)
 
@@ -50,8 +51,9 @@ class PluginRpcCallback(object):
 
 
 class WanQosPlugin(wanqos.WanQosPluginBase,
-                   wantcdevice.WanTcDevicePluginBase):
-    supported_extension_aliases = ['wan-tc', 'wan-tc-device']
+                   wantcdevice.WanTcDevicePluginBase,
+                   wantcclass.WanTcClassPluginBase):
+    supported_extension_aliases = ['wan-tc', 'wan-tc-device', 'wan-tc-class']
 
     def __init__(self):
         self.db = wan_qos_db.WanTcDb()
@@ -91,7 +93,7 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
     def get_wan_tcs(self, context, filters=None, fields=None,
                     sorts=None, limit=None, marker=None,
                     page_reverse=False):
-        return self.db.get_all_classes(context)
+        pass
 
     def delete_wan_tc(self, context, id):
         pass
@@ -104,6 +106,24 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
         # self.agent_rpc.create_wan_qos(context, wan_qos)
 
         # tenant_id = self._get_tenant_id_for_create(context, wan_qos_class)
+
+    def get_wan_tc_class(self, context, id, fields=None):
+        return self.db.get_class_by_id(context, id)
+
+    def update_wan_tc_class(self, context, id, wan_tc_class):
+        pass
+
+    def create_wan_tc_class(self, context, wan_tc_class):
+        LOG.debug('got new class request: %s' % wan_tc_class)
+        return self.db.create_wan_tc_class(context,
+                                           wan_tc_class['wan_tc_class'])
+
+    def delete_wan_tc_class(self, context, id):
+        self.db.delete_wtc_class(context, id)
+
+    def get_wan_tc_classs(self, context, filters=None, fields=None, sorts=None,
+                          limit=None, marker=None, page_reverse=False):
+        return self.db.get_all_classes(context)
 
     @staticmethod
     def _get_tenant_id_for_create(self, context, resource):

@@ -17,6 +17,8 @@ from oslo_utils import uuidutils
 from oslo_utils import timeutils
 from oslo_log import log as logging
 
+from neutron.db.models import segment
+
 from wan_qos.db.models import wan_tc as models
 from wan_qos.common import constants
 
@@ -41,7 +43,7 @@ class WanTcDb(object):
                     uptime=now,
                     heartbeat_timestamp=now
                 )
-                context.session.add(wan_tc_device)
+                return context.session.add(wan_tc_device)
             else:
                 LOG.debug('updating uptime for device: %s' % host_info['host'])
                 device.uptime = timeutils.utcnow()
@@ -64,11 +66,57 @@ class WanTcDb(object):
 
         return device_list_dict
 
-    def create_wan_tc_class(self, context, wan_qos_class):
-        pass
+    def create_wan_tc_class(self, context, wtc_class):
+
+        wtc_class_db = models.WanTcClass(
+            id=uuidutils.generate_uuid(),
+            direction=wtc_class['direction']
+        )
+
+        parent = wtc_class['parent']
+        if parent:
+            wtc_class_db.parent = parent
+
+        with context.session.begin(subtransactions=True):
+
+            if wtc_class['min']:
+                wtc_class_db.min = wtc_class['min']
+            if wtc_class['max']:
+                wtc_class_db.max = wtc_class['max']
+
+            context.session.add(wtc_class_db)
+            return self._class_to_dict(wtc_class_db)
+
+    def delete_wtc_class(self, context, id):
+        wtc_class_db = context.session.query(models.WanTcClass).filter_by(
+            id=id).first()
+        if wtc_class_db:
+            with context.session.begin(subtransactions=True):
+                context.session.delete(wtc_class_db)
+
+    def get_class_by_id(self, context, id):
+        wtc_class = context.session.query(models.WanTcClass).filter_by(
+            id=id).first()
+        if wtc_class:
+            return self._class_to_dict(wtc_class)
 
     def get_all_classes(self, context):
-        return context.session.query(models.WanTcClass).all()
+        wtc_classes_db = context.session.query(models.WanTcClass).all()
+        wtc_classes = []
+        for wtc_class in wtc_classes_db:
+            wtc_classes.append(self._class_to_dict(wtc_class))
+        return wtc_classes
+
+    def _class_to_dict(self, wtc_class):
+        class_dict = {
+            'id': wtc_class.id,
+            'direction': wtc_class.direction,
+            'min': wtc_class.min,
+            'max': wtc_class.max,
+            'parent': wtc_class.parent
+        }
+
+        return class_dict
 
     def _device_to_dict(self, device):
         device_dict = {
