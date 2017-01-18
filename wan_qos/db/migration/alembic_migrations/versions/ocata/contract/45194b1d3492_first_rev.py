@@ -68,7 +68,7 @@ def upgrade():
     op.create_foreign_key(
         'fk_wan_tc_selector_networks',
         'wan_tc_selector', 'networks',
-        ['network_id'], ['id'],
+        ['network'], ['id'],
     )
 
     op.create_table(
