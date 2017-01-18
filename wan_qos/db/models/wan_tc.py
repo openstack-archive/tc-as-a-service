@@ -52,8 +52,8 @@ class WanTcSelector(model_base.BASEV2,
                          sa.ForeignKey('wan_tc_class.id',
                                        ondelete='CASCADE'),
                          nullable=False)
-    network_id = sa.Column(sa.String(36),
-                           sa.ForeignKey('network.id',
-                                         ondelete='CASCADE'))
+    network = sa.Column(sa.String(36),
+                        sa.ForeignKey('network.id',
+                                      ondelete='CASCADE'))
     protocol = sa.Column(sa.String(15))
     match = sa.Column(sa.String(15))

@@ -76,6 +76,8 @@ class WanTcDb(object):
         parent = wtc_class['parent']
         if parent:
             wtc_class_db.parent = parent
+        else:
+            wtc_class_db.parent = wtc_class_db.id
 
         with context.session.begin(subtransactions=True):
 
@@ -108,13 +110,18 @@ class WanTcDb(object):
         return wtc_classes
 
     def _class_to_dict(self, wtc_class):
+
         class_dict = {
             'id': wtc_class.id,
             'direction': wtc_class.direction,
             'min': wtc_class.min,
-            'max': wtc_class.max,
-            'parent': wtc_class.parent
+            'max': wtc_class.max
         }
+
+        if wtc_class.parent == wtc_class.id:
+            class_dict['parent'] = ''
+        else:
+            class_dict['parent'] = wtc_class.parent
 
         return class_dict
 

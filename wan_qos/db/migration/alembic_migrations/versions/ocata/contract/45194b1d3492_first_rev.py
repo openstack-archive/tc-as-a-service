@@ -43,11 +43,17 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
+    op.create_foreign_key(
+        'fk_wtc_class',
+        'wan_tc_class', 'wan_tc_class',
+        ['parent'], ['id'], ondelete='CASCADE'
+    )
+
     op.create_table('wan_tc_selector',
                     sa.Column('id', sa.String(length=36), nullable=False),
                     sa.Column('class_id', sa.String(length=36),
                               nullable=False),
-                    sa.Column('network_id', sa.String(length=36)),
+                    sa.Column('network', sa.String(length=36)),
                     sa.Column('protocol', sa.String(length=15)),
                     sa.Column('match', sa.String(length=15)),
                     sa.PrimaryKeyConstraint('id')
