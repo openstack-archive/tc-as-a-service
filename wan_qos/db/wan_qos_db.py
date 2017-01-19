@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import threading
+
 from oslo_utils import uuidutils
 from oslo_utils import timeutils
 from oslo_log import log as logging
@@ -26,6 +28,11 @@ LOG = logging.getLogger(__name__)
 
 
 class WanTcDb(object):
+    _last_class_ext_id = None
+
+    def __init__(self):
+        self._lock = threading.Lock()
+
     def agent_up_notification(self, context, host_info):
         device = context.session.query(models.WanTcDevice).filter_by(
             host=host_info['host']
@@ -66,11 +73,28 @@ class WanTcDb(object):
 
         return device_list_dict
 
+    def get_last_class_ext_id(self, context):
+
+        self._lock.acquire()
+        if not self._last_class_ext_id:
+            last_class_ext_id_db, = context.session.query(
+                models.WanTcClass.class_ext_id).order_by(
+                models.WanTcClass.class_ext_id.desc()).first()
+            if last_class_ext_id_db:
+                self._last_class_ext_id = last_class_ext_id_db
+            else:
+                self._last_class_ext_id = 10
+        self._last_class_ext_id += 1
+        next_id = self._last_class_ext_id
+        self._lock.release()
+        return next_id
+
     def create_wan_tc_class(self, context, wtc_class):
 
         wtc_class_db = models.WanTcClass(
             id=uuidutils.generate_uuid(),
-            direction=wtc_class['direction']
+            direction=wtc_class['direction'],
+            class_ext_id=self.get_last_class_ext_id(context)
         )
 
         parent = wtc_class['parent']

@@ -115,8 +115,12 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
 
     def create_wan_tc_class(self, context, wan_tc_class):
         LOG.debug('got new class request: %s' % wan_tc_class)
-        return self.db.create_wan_tc_class(context,
+        wtc_class_db = self.db.create_wan_tc_class(context,
                                            wan_tc_class['wan_tc_class'])
+
+        
+
+        return wtc_class_db
 
     def delete_wan_tc_class(self, context, id):
         self.db.delete_wtc_class(context, id)
