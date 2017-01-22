@@ -20,6 +20,7 @@ from oslo_utils import timeutils
 from oslo_log import log as logging
 
 from neutron.db.models import segment
+from neutron_lib import exceptions
 
 from wan_qos.db.models import wan_tc as models
 from wan_qos.common import constants
@@ -77,11 +78,11 @@ class WanTcDb(object):
 
         self._lock.acquire()
         if not self._last_class_ext_id:
-            last_class_ext_id_db, = context.session.query(
+            last_class_ext_id_db = context.session.query(
                 models.WanTcClass.class_ext_id).order_by(
-                models.WanTcClass.class_ext_id.desc()).first()
+                models.WanTcClass.class_ext_id.desc())
             if last_class_ext_id_db:
-                self._last_class_ext_id = last_class_ext_id_db
+                self._last_class_ext_id, = last_class_ext_id_db.first()
             else:
                 self._last_class_ext_id = 10
         self._last_class_ext_id += 1
@@ -98,8 +99,13 @@ class WanTcDb(object):
         )
 
         parent = wtc_class['parent']
+        parent_class_ext_id = 1
         if parent:
+            parent_class = self.get_class_by_id(context, parent)
+            if not parent_class:
+                raise exceptions.BadRequest(msg='invalid parent id')
             wtc_class_db.parent = parent
+            parent_class_ext_id = parent_class['class_ext_id']
         else:
             wtc_class_db.parent = wtc_class_db.id
 
@@ -111,7 +117,9 @@ class WanTcDb(object):
                 wtc_class_db.max = wtc_class['max']
 
             context.session.add(wtc_class_db)
-            return self._class_to_dict(wtc_class_db)
+        class_dict = self._class_to_dict(wtc_class_db)
+        class_dict['parent_class_ext_id'] = parent_class_ext_id
+        return class_dict
 
     def delete_wtc_class(self, context, id):
         wtc_class_db = context.session.query(models.WanTcClass).filter_by(
@@ -139,7 +147,8 @@ class WanTcDb(object):
             'id': wtc_class.id,
             'direction': wtc_class.direction,
             'min': wtc_class.min,
-            'max': wtc_class.max
+            'max': wtc_class.max,
+            'class_ext_id': wtc_class.class_ext_id
         }
 
         if wtc_class.parent == wtc_class.id:

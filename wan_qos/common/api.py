@@ -52,8 +52,8 @@ class TcAgentApi(object):
         target = oslo_messaging.Target(topic=topic, version='1.0')
         self.client = n_rpc.get_client(target)
 
-    def create_wan_qos(self, context, wan_qos_dict):
+    def create_wtc_class(self, context, wtc_class_dict):
         cctxt = self.client.prepare()
         return cctxt.call(context,
-                          'create_wan_qos',
-                          wan_qos_dict)
+                          'create_wtc_class',
+                          wtc_class_dict=wtc_class_dict)

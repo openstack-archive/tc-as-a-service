@@ -18,6 +18,7 @@ from oslo_log import log as logging
 import oslo_messaging as messaging
 
 from neutron import context as ctx
+from neutron import manager
 
 from wan_qos.agent import tc_driver
 from wan_qos.common import api
@@ -26,7 +27,7 @@ from wan_qos.common import topics
 LOG = logging.getLogger(__name__)
 
 
-class TcAgentManager:
+class TcAgentManager(manager.Manager):
     target = messaging.Target(version='1.0')
 
     def __init__(self, host=None, conf=None):
@@ -65,3 +66,28 @@ class TcAgentManager:
     def periodic_tasks(self, context, raise_on_error=False):
         LOG.info("periodic task")
         self.plugin_rpc.device_heartbeat(context, self.host)
+
+    def create_wtc_class(self, context, wtc_class_dict):
+        LOG.debug('got request for new class: %s' % wtc_class_dict)
+        class_dict = {
+            'parent': wtc_class_dict['parent_class_ext_id'],
+            'child': wtc_class_dict['class_ext_id']
+
+        }
+
+        if wtc_class_dict['min']:
+            class_dict['min'] = wtc_class_dict['min']
+        if wtc_class_dict['max']:
+            class_dict['max'] = wtc_class_dict['max']
+        if wtc_class_dict['direction'] == 'in' or wtc_class_dict[
+            'direction'] == 'both':
+            class_dict['port_side'] = 'lan_port'
+            self._create_wtc_class(class_dict)
+        if wtc_class_dict['direction'] == 'out' or wtc_class_dict[
+            'direction'] == 'both':
+            class_dict['port_side'] = 'wan_port'
+            self._create_wtc_class(class_dict)
+
+
+    def _create_wtc_class(self, class_dict):
+        self.agent.create_traffic_limiter(class_dict)

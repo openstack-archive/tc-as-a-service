@@ -24,6 +24,9 @@ from neutron import service as neutron_service
 
 from wan_qos.common import topics
 
+import eventlet
+eventlet.monkey_patch()
+
 WANTC_OPTS = [
     cfg.StrOpt('lan_port_name',
                default='eth0',
@@ -45,6 +48,7 @@ def main():
     common_config.init(sys.argv[1:])
     config.setup_logging()
     server = neutron_service.Service.create(
+        binary='tc_agent2',
         topic=topics.TC_AGENT,
         report_interval=10,
         manager='wan_qos.agent.tc_manager.TcAgentManager')

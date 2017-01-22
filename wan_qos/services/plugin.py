@@ -87,26 +87,6 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
         """Get description of the plugin."""
         return 'Plugin for rate limiting on WAN links.'
 
-    def get_wan_tc(self, context, id, fields=None):
-        pass
-
-    def get_wan_tcs(self, context, filters=None, fields=None,
-                    sorts=None, limit=None, marker=None,
-                    page_reverse=False):
-        pass
-
-    def delete_wan_tc(self, context, id):
-        pass
-
-    def update_wan_tc(self, context, id, wan_qos):
-        pass
-
-    def create_wan_tc(self, context, wan_qos):
-        pass
-        # self.agent_rpc.create_wan_qos(context, wan_qos)
-
-        # tenant_id = self._get_tenant_id_for_create(context, wan_qos_class)
-
     def get_wan_tc_class(self, context, id, fields=None):
         return self.db.get_class_by_id(context, id)
 
@@ -116,10 +96,9 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
     def create_wan_tc_class(self, context, wan_tc_class):
         LOG.debug('got new class request: %s' % wan_tc_class)
         wtc_class_db = self.db.create_wan_tc_class(context,
-                                           wan_tc_class['wan_tc_class'])
-
-        
-
+                                                   wan_tc_class[
+                                                       'wan_tc_class'])
+        self.agent_rpc.create_wtc_class(context, wtc_class_db)
         return wtc_class_db
 
     def delete_wan_tc_class(self, context, id):
@@ -141,3 +120,23 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
         else:
             tenant_id = context.tenant_id
         return tenant_id
+
+    def get_wan_tc(self, context, id, fields=None):
+        pass
+
+    def get_wan_tcs(self, context, filters=None, fields=None,
+                    sorts=None, limit=None, marker=None,
+                    page_reverse=False):
+        pass
+
+    def delete_wan_tc(self, context, id):
+        pass
+
+    def update_wan_tc(self, context, id, wan_qos):
+        pass
+
+    def create_wan_tc(self, context, wan_qos):
+        pass
+        # self.agent_rpc.create_wan_qos(context, wan_qos)
+
+        # tenant_id = self._get_tenant_id_for_create(context, wan_qos_class)

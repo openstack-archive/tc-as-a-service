@@ -57,8 +57,10 @@ class TcDriver(agent_api.AgentInterface):
             max - maximum traffic rate. if not provide, the maximum rate will
                 be limitted by parent maximum rate.
         """
+        LOG.debug('got request for new class: %s' % tc_dict)
         tc_dict['command'] = 'add'
         self._create_or_update_limiter(tc_dict)
+        LOG.debug('new class created.')
 
     def update_traffic_limiter(self, tc_dict):
         tc_dict['command'] = 'change'
@@ -81,7 +83,7 @@ class TcDriver(agent_api.AgentInterface):
                   tc_dict['parent'], tc_dict['child'],
                   tc_dict['min']
         )
-        if tc_dict['max']:
+        if 'max' in tc_dict:
             cmd += ' ceil %s' % tc_dict['max']
         check_call(cmd, shell=True)
 
