@@ -90,4 +90,4 @@ class TcAgentManager(manager.Manager):
 
 
     def _create_wtc_class(self, class_dict):
-        self.agent.create_traffic_limiter(class_dict)
+        self.agent.create_traffic_class(class_dict)

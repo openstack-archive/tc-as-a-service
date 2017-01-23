@@ -47,26 +47,26 @@ class TcDriver(agent_api.AgentInterface):
                                 str(tc_dict['max_rate']),
                                 str(tc_dict['max_rate'])), shell=True)
 
-    def create_traffic_limiter(self, tc_dict):
-        """ Create new traffic limiter.
+    def create_traffic_class(self, tc_dict):
+        """ Create new traffic class.
         Parameters:
             port_side - lan_port / wan_port
             parent - the parent class
-            child - the limiter id
+            child - the class id
             min - minimum traffic rate (CIR)
             max - maximum traffic rate. if not provide, the maximum rate will
                 be limitted by parent maximum rate.
         """
         LOG.debug('got request for new class: %s' % tc_dict)
         tc_dict['command'] = 'add'
-        self._create_or_update_limiter(tc_dict)
+        self._create_or_update_class(tc_dict)
         LOG.debug('new class created.')
 
-    def update_traffic_limiter(self, tc_dict):
+    def update_traffic_class(self, tc_dict):
         tc_dict['command'] = 'change'
-        self._create_or_update_limiter(tc_dict)
+        self._create_or_update_class(tc_dict)
 
-    def remove_traffic_limiter(self, tc_dict):
+    def remove_traffic_class(self, tc_dict):
         self._delete_filter(tc_dict)
         cmd = 'sudo tc class del dev %s classid %s:%s' % (
             self.ports[tc_dict['port_side']],
@@ -75,7 +75,7 @@ class TcDriver(agent_api.AgentInterface):
         )
         check_call(cmd, shell=True)
 
-    def _create_or_update_limiter(self, tc_dict):
+    def _create_or_update_class(self, tc_dict):
         cmd = 'sudo tc class %s dev %s parent 1:%s classid 1:%s htb' \
               ' rate %s' % (
                   tc_dict['command'],

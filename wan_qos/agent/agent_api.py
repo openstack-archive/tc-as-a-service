@@ -35,16 +35,16 @@ class AgentInterface(object):
          as upper limit"""
 
     @abc.abstractmethod
-    def create_traffic_limiter(self, tc_dict):
-        """ Add traffic limiter using traffic information from the
+    def create_traffic_class(self, tc_dict):
+        """ Add traffic class using traffic information from the
         dictionary. """
 
     @abc.abstractmethod
-    def update_traffic_limiter(self, tc_dict):
+    def update_traffic_class(self, tc_dict):
         """ update traffic control using information from tc dictionary. """
 
     @abc.abstractmethod
-    def remove_traffic_limiter(self, tc_dict):
+    def remove_traffic_class(self, tc_dict):
         """ update traffic control using information from tc dictionary. """
 
     @abc.abstractmethod
