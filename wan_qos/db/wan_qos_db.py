@@ -19,6 +19,7 @@ from oslo_utils import uuidutils
 from oslo_utils import timeutils
 from oslo_log import log as logging
 
+from neutron import context as ctx
 from neutron.db.models import segment
 from neutron_lib import exceptions
 
@@ -33,6 +34,20 @@ class WanTcDb(object):
 
     def __init__(self):
         self._lock = threading.Lock()
+        self._initialize_tables()
+
+    def _initialize_tables(self):
+        context = ctx.get_admin_context()
+        root_class = context.session.query(models.WanTcClass).filter_by(
+            id='root').first()
+        if not root_class:
+            with context.session.begin(subtransactions=True):
+                root_class = models.WanTcClass(
+                    id='root',
+                    class_ext_id=1,
+                    direction='both'
+                )
+                context.session.add(root_class)
 
     def agent_up_notification(self, context, host_info):
         device = context.session.query(models.WanTcDevice).filter_by(
@@ -80,9 +95,9 @@ class WanTcDb(object):
         if not self._last_class_ext_id:
             last_class_ext_id_db = context.session.query(
                 models.WanTcClass.class_ext_id).order_by(
-                models.WanTcClass.class_ext_id.desc())
+                models.WanTcClass.class_ext_id.desc()).first()
             if last_class_ext_id_db:
-                self._last_class_ext_id, = last_class_ext_id_db.first()
+                self._last_class_ext_id, = last_class_ext_id_db
             else:
                 self._last_class_ext_id = 10
         self._last_class_ext_id += 1
@@ -98,22 +113,22 @@ class WanTcDb(object):
             class_ext_id=self.get_last_class_ext_id(context)
         )
 
-        parent = wtc_class['parent']
         parent_class_ext_id = 1
-        if parent:
+        if 'parent' in wtc_class:
+            parent = wtc_class['parent']
             parent_class = self.get_class_by_id(context, parent)
             if not parent_class:
                 raise exceptions.BadRequest(msg='invalid parent id')
             wtc_class_db.parent = parent
             parent_class_ext_id = parent_class['class_ext_id']
         else:
-            wtc_class_db.parent = wtc_class_db.id
+            wtc_class_db.parent = 'root'
 
         with context.session.begin(subtransactions=True):
 
-            if wtc_class['min']:
+            if 'min' in wtc_class:
                 wtc_class_db.min = wtc_class['min']
-            if wtc_class['max']:
+            if 'max' in wtc_class:
                 wtc_class_db.max = wtc_class['max']
 
             context.session.add(wtc_class_db)
@@ -135,7 +150,8 @@ class WanTcDb(object):
             return self._class_to_dict(wtc_class)
 
     def get_all_classes(self, context):
-        wtc_classes_db = context.session.query(models.WanTcClass).all()
+        wtc_classes_db = context.session.query(models.WanTcClass).filter(
+            models.WanTcClass.id != 'root').all()
         wtc_classes = []
         for wtc_class in wtc_classes_db:
             wtc_classes.append(self._class_to_dict(wtc_class))
@@ -148,13 +164,9 @@ class WanTcDb(object):
             'direction': wtc_class.direction,
             'min': wtc_class.min,
             'max': wtc_class.max,
-            'class_ext_id': wtc_class.class_ext_id
+            'class_ext_id': wtc_class.class_ext_id,
+            'parent': wtc_class.parent
         }
-
-        if wtc_class.parent == wtc_class.id:
-            class_dict['parent'] = ''
-        else:
-            class_dict['parent'] = wtc_class.parent
 
         return class_dict
 
@@ -186,3 +198,24 @@ class WanTcDb(object):
         ).first()
         if device:
             return self._device_to_dict(device)
+
+    def get_class_tree(self):
+        context = ctx.get_admin_context()
+        wtc_classes = self._get_root_classes(context)
+        return wtc_classes
+
+    def _get_root_classes(self, context):
+        root_class_db = context.session.query(models.WanTcClass).filter_by(
+            id='root').first()
+        root_class = self._class_to_dict(root_class_db)
+        self._get_child_classes(context, root_class)
+        return root_class
+
+    def _get_child_classes(self, context, parent_class):
+        child_classes_db = context.session.query(models.WanTcClass).filter_by(
+            parent=parent_class['id']).all()
+        parent_class['child_list'] = []
+        for child_class_db in child_classes_db:
+            child_class = self._class_to_dict(child_class_db)
+            parent_class['child_list'].append(child_class)
+            self._get_child_classes(context, child_class)
