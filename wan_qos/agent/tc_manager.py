@@ -19,6 +19,7 @@ import oslo_messaging as messaging
 
 from neutron import context as ctx
 from neutron import manager
+from neutron_lib import exceptions
 
 from wan_qos.agent import tc_driver
 from wan_qos.common import api
@@ -59,6 +60,18 @@ class TcAgentManager(manager.Manager):
             'max_rate': self.conf.WANTC.wan_max_rate
         }
         self.agent.set_root_queue(tc_dict)
+        agent_conf = self.plugin_rpc.get_configuration_from_db(
+            ctx.get_admin_context())
+        class_tree = agent_conf['class_tree']
+        if class_tree['id'] == 'root':
+            self.init_child_classes(class_tree['child_list'])
+            return
+        raise exceptions.InvalidInput(error_message='Did not get root class')
+
+    def init_child_classes(self, child_list):
+        for child in child_list:
+            self.create_wtc_class(None, child)
+            self.init_child_classes(child['child_list'])
 
     def after_start(self):
         LOG.info("WAN QoS agent started")
@@ -87,7 +100,6 @@ class TcAgentManager(manager.Manager):
             'direction'] == 'both':
             class_dict['port_side'] = 'wan_port'
             self._create_wtc_class(class_dict)
-
 
     def _create_wtc_class(self, class_dict):
         self.agent.create_traffic_class(class_dict)

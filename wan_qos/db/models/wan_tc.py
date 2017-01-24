@@ -41,6 +41,7 @@ class WanTcClass(model_base.BASEV2,
                        sa.ForeignKey('wan_tc_class.id',
                                      ondelete='CASCADE'),
                        nullable=True)
+    parent_class_ext_id = sa.Column(sa.Integer)
     min = sa.Column(sa.String(15))
     max = sa.Column(sa.String(15))
 

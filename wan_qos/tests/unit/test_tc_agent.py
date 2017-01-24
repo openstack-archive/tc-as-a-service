@@ -23,7 +23,7 @@ from wan_qos.agent import tc_manager
 from wan_qos.services import plugin
 
 WANTC_group = cfg.OptGroup(name='WANTC',
-                            title='WAN QoS options')
+                           title='WAN QoS options')
 
 opts = [
     cfg.StrOpt('lan_port_name',
@@ -145,7 +145,6 @@ class TestApiMessages(base.BaseTestCase):
         super(TestApiMessages, self).setUp()
         cfg.CONF.register_group(WANTC_group)
         cfg.CONF.register_opts(opts, group='WANTC')
-        self.plugin = plugin.WANTCPlugin()
-
+        self.plugin = plugin.WanQosPlugin()
 
 

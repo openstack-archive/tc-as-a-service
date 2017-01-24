@@ -5,7 +5,7 @@ from neutron.tests.unit import testlib_api
 from oslo_config import cfg
 
 from wan_qos.db import wan_qos_db
-
+from wan_qos.services import plugin
 
 class TestTcDb(testlib_api.SqlTestCase):
     def setUp(self):
@@ -49,3 +49,22 @@ class TestTcDb(testlib_api.SqlTestCase):
             wtc_class['max'] = max
 
         return self.db.create_wan_tc_class(self.context, wtc_class)
+
+
+class TestPlugin(testlib_api.SqlTestCase):
+    def setUp(self):
+        super(TestPlugin, self).setUp()
+        self.plugin = plugin.WanQosPlugin()
+
+    def test_create_class(self):
+        wtc_class = {
+            'wan_tc_class': {
+                'direction': 'both',
+                'min': '1mbit'
+            }
+        }
+
+        wan_tc = self.plugin.create_wan_tc_class(ctx.get_admin_context(), wtc_class)
+
+        assert wan_tc is not None
+        print (wan_tc)

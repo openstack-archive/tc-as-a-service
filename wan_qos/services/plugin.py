@@ -49,6 +49,13 @@ class PluginRpcCallback(object):
     def device_heartbeat(self, context, host):
         self.plugin.db.device_heartbeat(context, host)
 
+    def get_configuration_from_db(self, context, host):
+        conf = {
+            'class_tree': self.plugin.db.get_class_tree()
+        }
+
+        return conf
+
 
 class WanQosPlugin(wanqos.WanQosPluginBase,
                    wantcdevice.WanTcDevicePluginBase,

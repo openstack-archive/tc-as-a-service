@@ -113,16 +113,16 @@ class WanTcDb(object):
             class_ext_id=self.get_last_class_ext_id(context)
         )
 
-        parent_class_ext_id = 1
-        if 'parent' in wtc_class:
+        if wtc_class['parent'] != '':
             parent = wtc_class['parent']
             parent_class = self.get_class_by_id(context, parent)
             if not parent_class:
                 raise exceptions.BadRequest(msg='invalid parent id')
             wtc_class_db.parent = parent
-            parent_class_ext_id = parent_class['class_ext_id']
+            wtc_class_db.parent_class_ext_id = parent_class['class_ext_id']
         else:
             wtc_class_db.parent = 'root'
+            wtc_class_db.parent_class_ext_id = 1
 
         with context.session.begin(subtransactions=True):
 
@@ -133,7 +133,7 @@ class WanTcDb(object):
 
             context.session.add(wtc_class_db)
         class_dict = self._class_to_dict(wtc_class_db)
-        class_dict['parent_class_ext_id'] = parent_class_ext_id
+        class_dict['parent_class_ext_id'] = wtc_class_db.parent_class_ext_id
         return class_dict
 
     def delete_wtc_class(self, context, id):
@@ -165,7 +165,8 @@ class WanTcDb(object):
             'min': wtc_class.min,
             'max': wtc_class.max,
             'class_ext_id': wtc_class.class_ext_id,
-            'parent': wtc_class.parent
+            'parent': wtc_class.parent,
+            'parent_class_ext_id': wtc_class.parent_class_ext_id
         }
 
         return class_dict
