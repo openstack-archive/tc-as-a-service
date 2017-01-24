@@ -57,3 +57,9 @@ class TcAgentApi(object):
         return cctxt.call(context,
                           'create_wtc_class',
                           wtc_class_dict=wtc_class_dict)
+
+    def delete_wtc_class(self, context, wtc_class_tree):
+        cctxt = self.client.prepare()
+        return cctxt.call(context,
+                          'delete_wtc_class',
+                          wtc_class_tree=wtc_class_tree)

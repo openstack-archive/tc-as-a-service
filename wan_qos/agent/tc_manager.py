@@ -103,3 +103,21 @@ class TcAgentManager(manager.Manager):
 
     def _create_wtc_class(self, class_dict):
         self.agent.create_traffic_class(class_dict)
+
+    def delete_wtc_class(self, context, wtc_class_tree):
+        for child in wtc_class_tree['child_list']:
+            self.delete_wtc_class(context, child)
+        self._delete_wtc_class(wtc_class_tree)
+
+    def _delete_wtc_class(self, wtc_class):
+        tc_dict = {
+            'parent': wtc_class['parent_class_ext_id'],
+            'child': wtc_class['class_ext_id']
+        }
+
+        if wtc_class['direction'] == 'in' or wtc_class['direction'] == 'both':
+            tc_dict['port_side'] = 'lan_port'
+            self.agent.remove_traffic_class(tc_dict)
+        if wtc_class['direction'] == 'out' or wtc_class['direction'] == 'both':
+            tc_dict['port_side'] = 'wan_port'
+            self.agent.remove_traffic_class(tc_dict)

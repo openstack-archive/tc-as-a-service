@@ -66,11 +66,11 @@ class TcDriver(agent_api.AgentInterface):
         tc_dict['command'] = 'change'
         self._create_or_update_class(tc_dict)
 
-    def remove_traffic_class(self, tc_dict):
-        self._delete_filter(tc_dict)
-        cmd = 'sudo tc class del dev %s classid %s:%s' % (
+    def remove_traffic_class(self, tc_dict, with_filter=False):
+        if with_filter:
+            self._delete_filter(tc_dict)
+        cmd = 'sudo tc class del dev %s classid 1:%s' % (
             self.ports[tc_dict['port_side']],
-            tc_dict['parent'],
             tc_dict['child']
         )
         check_call(cmd, shell=True)

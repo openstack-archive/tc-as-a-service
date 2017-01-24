@@ -113,7 +113,7 @@ class WanTcDb(object):
             class_ext_id=self.get_last_class_ext_id(context)
         )
 
-        if wtc_class['parent'] != '':
+        if 'parent' in wtc_class and wtc_class['parent'] != '':
             parent = wtc_class['parent']
             parent_class = self.get_class_by_id(context, parent)
             if not parent_class:
@@ -149,15 +149,26 @@ class WanTcDb(object):
         if wtc_class:
             return self._class_to_dict(wtc_class)
 
-    def get_all_classes(self, context):
-        wtc_classes_db = context.session.query(models.WanTcClass).filter(
-            models.WanTcClass.id != 'root').all()
-        wtc_classes = []
-        for wtc_class in wtc_classes_db:
-            wtc_classes.append(self._class_to_dict(wtc_class))
-        return wtc_classes
+    def get_all_classes(self, context, filters=None,
+                        fields=None,
+                        sorts=None, limit=None, marker=None,
+                        page_reverse=False):
+        marker_obj = self._get_marker_obj(
+            context, 'wan_tc_class', limit, marker)
+        all_classes = self._get_collection(context, models.WanTcClass,
+                                           self._class_to_dict,
+                                           filters=filters, fields=fields,
+                                           sorts=sorts, limit=limit,
+                                           marker_obj=marker_obj,
+                                           page_reverse=page_reverse)
+        if not filters:
+            for wtc_class in all_classes:
+                if wtc_class['id'] == 'root':
+                    all_classes.remove(wtc_class)
+                    break
+        return all_classes
 
-    def _class_to_dict(self, wtc_class):
+    def _class_to_dict(self, wtc_class, fields=None):
 
         class_dict = {
             'id': wtc_class.id,
@@ -171,7 +182,7 @@ class WanTcDb(object):
 
         return class_dict
 
-    def _device_to_dict(self, device):
+    def _device_to_dict(self, device, fields=None):
         device_dict = {
             'id': device.id,
             'host': device.host,
@@ -200,14 +211,10 @@ class WanTcDb(object):
         if device:
             return self._device_to_dict(device)
 
-    def get_class_tree(self):
+    def get_class_tree(self, start_from_id='root'):
         context = ctx.get_admin_context()
-        wtc_classes = self._get_root_classes(context)
-        return wtc_classes
-
-    def _get_root_classes(self, context):
         root_class_db = context.session.query(models.WanTcClass).filter_by(
-            id='root').first()
+            id=start_from_id).first()
         root_class = self._class_to_dict(root_class_db)
         self._get_child_classes(context, root_class)
         return root_class
@@ -220,3 +227,61 @@ class WanTcDb(object):
             child_class = self._class_to_dict(child_class_db)
             parent_class['child_list'].append(child_class)
             self._get_child_classes(context, child_class)
+
+    def _get_collection(self, context, model, dict_func, filters=None,
+                        fields=None, sorts=None, limit=None, marker_obj=None,
+                        page_reverse=False):
+        """Get collection object based on query for resources."""
+        query = self._get_collection_query(context, model, filters=filters,
+                                           sorts=sorts,
+                                           limit=limit,
+                                           marker_obj=marker_obj,
+                                           page_reverse=page_reverse)
+        items = [dict_func(c, fields) for c in query]
+        if limit and page_reverse:
+            items.reverse()
+        return items
+
+    def _get_collection_query(self, context, model, filters=None,
+                              sorts=None, limit=None, marker_obj=None,
+                              page_reverse=False):
+        """Get collection query for the models."""
+        collection = self._model_query(context, model)
+        collection = self._apply_filters_to_query(collection, model, filters)
+        return collection
+
+    def _get_marker_obj(self, context, resource, limit, marker):
+        """Get marker object for the resource."""
+        if limit and marker:
+            return getattr(self, '_get_%s' % resource)(context, marker)
+        return None
+
+    def _fields(self, resource, fields):
+        """Get fields for the resource for get query."""
+        if fields:
+            return dict(((key, item) for key, item in resource.items()
+                         if key in fields))
+        return resource
+
+    def _model_query(self, context, model):
+        """Query model based on filter."""
+        query = context.session.query(model)
+        query_filter = None
+        if not context.is_admin and hasattr(model, 'tenant_id'):
+            if hasattr(model, 'shared'):
+                query_filter = ((model.tenant_id == context.tenant_id) |
+                                (model.shared == sa.true()))
+            else:
+                query_filter = (model.tenant_id == context.tenant_id)
+        if query_filter is not None:
+            query = query.filter(query_filter)
+        return query
+
+    def _apply_filters_to_query(self, query, model, filters):
+        """Apply filters to query for the models."""
+        if filters:
+            for key, value in filters.items():
+                column = getattr(model, key, None)
+                if column:
+                    query = query.filter(column.in_(value))
+        return query

@@ -109,11 +109,15 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
         return wtc_class_db
 
     def delete_wan_tc_class(self, context, id):
+        LOG.debug('Got request to delete class id: %s' % id)
+        class_tree = self.db.get_class_tree(id)
         self.db.delete_wtc_class(context, id)
+        self.agent_rpc.delete_wtc_class(context, class_tree)
 
     def get_wan_tc_classs(self, context, filters=None, fields=None, sorts=None,
                           limit=None, marker=None, page_reverse=False):
-        return self.db.get_all_classes(context)
+        return self.db.get_all_classes(context, filters, fields, sorts, limit,
+                                       marker, page_reverse)
 
     @staticmethod
     def _get_tenant_id_for_create(self, context, resource):
