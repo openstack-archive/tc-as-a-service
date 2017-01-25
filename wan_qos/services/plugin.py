@@ -27,7 +27,7 @@ from wan_qos.common import api
 from wan_qos.common import constants
 from wan_qos.common import topics
 from wan_qos.db import wan_qos_db
-from wan_qos.extensions import wanqos
+from wan_qos.extensions import wantcfilter
 from wan_qos.extensions import wantcdevice
 from wan_qos.extensions import wantcclass
 
@@ -57,10 +57,11 @@ class PluginRpcCallback(object):
         return conf
 
 
-class WanQosPlugin(wanqos.WanQosPluginBase,
+class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
                    wantcdevice.WanTcDevicePluginBase,
                    wantcclass.WanTcClassPluginBase):
-    supported_extension_aliases = ['wan-tc', 'wan-tc-device', 'wan-tc-class']
+    supported_extension_aliases = ['wan-tc-filter', 'wan-tc-device',
+                                   'wan-tc-class']
 
     def __init__(self):
         self.db = wan_qos_db.WanTcDb()
@@ -75,6 +76,14 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
                                   fanout=False)
         self.conn.consume_in_threads()
 
+    def get_plugin_type(self):
+        """Get type of the plugin."""
+        return constants.WANTC
+
+    def get_plugin_description(self):
+        """Get description of the plugin."""
+        return 'Plugin for rate limiting on WAN links.'
+
     def delete_wan_tc_device(self, context, id):
         self.db.delete_wan_tc_device(context, id)
 
@@ -86,14 +95,6 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
                            page_reverse=False):
         return self.db.get_all_devices(context, filters, fields, sorts, limit,
                                        marker, page_reverse)
-
-    def get_plugin_type(self):
-        """Get type of the plugin."""
-        return constants.WANTC
-
-    def get_plugin_description(self):
-        """Get description of the plugin."""
-        return 'Plugin for rate limiting on WAN links.'
 
     def get_wan_tc_class(self, context, id, fields=None):
         return self.db.get_class_by_id(context, id)
@@ -120,6 +121,26 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
         return self.db.get_all_classes(context, filters, fields, sorts, limit,
                                        marker, page_reverse)
 
+    def delete_wan_tc_filter(self, context, id):
+        pass
+
+    def get_wan_tc_filters(self, context, filters=None, fields=None,
+                           sorts=None, limit=None, marker=None,
+                           page_reverse=False):
+        return self.db.get_wan_tc_filters(context, filters, fields, sorts,
+                                          limit,
+                                          marker, page_reverse)
+
+    def create_wan_tc_filter(self, context, wan_tc_filter):
+        return self.db.create_wan_tc_filter(context,
+                                            wan_tc_filter['wan_tc_filter'])
+
+    def update_wan_tc_filter(self, context, id, wan_tc_filter):
+        pass
+
+    def get_wan_tc_filter(self, context, id, fields=None):
+        return self.db.get_wan_tc_filter(context, id, fields)
+
     @staticmethod
     def _get_tenant_id_for_create(self, context, resource):
         """Get tenant id for creation of resources."""
@@ -132,23 +153,3 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
         else:
             tenant_id = context.tenant_id
         return tenant_id
-
-    def get_wan_tc(self, context, id, fields=None):
-        pass
-
-    def get_wan_tcs(self, context, filters=None, fields=None,
-                    sorts=None, limit=None, marker=None,
-                    page_reverse=False):
-        pass
-
-    def delete_wan_tc(self, context, id):
-        pass
-
-    def update_wan_tc(self, context, id, wan_qos):
-        pass
-
-    def create_wan_tc(self, context, wan_qos):
-        pass
-        # self.agent_rpc.create_wan_qos(context, wan_qos)
-
-        # tenant_id = self._get_tenant_id_for_create(context, wan_qos_class)

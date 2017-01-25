@@ -14,11 +14,12 @@
 #    under the License.
 
 WANTC = 'WANTC'
-WAN_TC = 'wan_tc'
-WAN_TC_PATH = 'wan-tcs'
 
 WAN_TC_DEVICE = 'wan_tc_device'
 WAN_TC_DEVICE_PATH = 'wan-tc-devices'
 
 WAN_TC_CLASS = 'wan_tc_class'
 WAN_TC_CLASS_PATH = 'wan-tc-classs'
+
+WAN_TC_FILTER = 'wan_tc_filter'
+WAN_TC_FILTER_PATH = 'wan-tc-filters'

@@ -290,3 +290,47 @@ class WanTcDb(object):
                 if column:
                     query = query.filter(column.in_(value))
         return query
+
+    def create_wan_tc_filter(self, context, wan_tc_filter):
+
+        wtc_filter_db = models.WanTcFilter(
+            id=uuidutils.generate_uuid(),
+            protocol=wan_tc_filter['protocol'],
+            match=wan_tc_filter['match'],
+            class_id=wan_tc_filter['class_id']
+        )
+
+        with context.session.begin(subtransactions=True):
+            context.session.add(wtc_filter_db)
+
+        return self._filter_to_dict(wtc_filter_db)
+
+    def _filter_to_dict(self, wtc_filter_db, fields=None):
+        wtc_filter = {
+            'id': wtc_filter_db.id,
+            'protocol': wtc_filter_db.protocol,
+            'match': wtc_filter_db.match,
+            'class_id': wtc_filter_db.class_id
+        }
+
+        return wtc_filter
+
+    def get_wan_tc_filter(self, context, id, fields=None):
+
+        wtc_filter_db = context.session.query(models.WanTcFilter).filter_by(
+            id=id).first()
+        if wtc_filter_db:
+            return self._filter_to_dict(wtc_filter_db)
+        return {}
+
+    def get_wan_tc_filters(self, context, filters=None, fields=None,
+                           sorts=None, limit=None, marker=None,
+                           page_reverse=False):
+        marker_obj = self._get_marker_obj(
+            context, 'wan_tc_filter', limit, marker)
+        return self._get_collection(context, models.WanTcFilter,
+                                    self._filter_to_dict,
+                                    filters=filters, fields=fields,
+                                    sorts=sorts, limit=limit,
+                                    marker_obj=marker_obj,
+                                    page_reverse=page_reverse)

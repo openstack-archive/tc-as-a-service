@@ -50,8 +50,9 @@ def upgrade():
         ['parent'], ['id'], ondelete='CASCADE'
     )
 
-    op.create_table('wan_tc_selector',
+    op.create_table('wan_tc_filter',
                     sa.Column('id', sa.String(length=36), nullable=False),
+                    sa.Column('project_id', sa.String(length=36)),
                     sa.Column('class_id', sa.String(length=36),
                               nullable=False),
                     sa.Column('network', sa.String(length=36)),
@@ -61,14 +62,14 @@ def upgrade():
                     )
 
     op.create_foreign_key(
-        'fk_wan_tc__selector_class',
-        'wan_tc_selector', 'wan_tc_class',
+        'fk_wan_tc__filter_class',
+        'wan_tc_filter', 'wan_tc_class',
         ['class_id'], ['id'],
     )
 
     op.create_foreign_key(
-        'fk_wan_tc_selector_networks',
-        'wan_tc_selector', 'networks',
+        'fk_wan_tc_filter_networks',
+        'wan_tc_filter', 'networks',
         ['network'], ['id'],
     )
 

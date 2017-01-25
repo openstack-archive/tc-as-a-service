@@ -46,9 +46,9 @@ class WanTcClass(model_base.BASEV2,
     max = sa.Column(sa.String(15))
 
 
-class WanTcSelector(model_base.BASEV2,
-                    model_base.HasId, model_base.HasProject):
-    __tablename__ = 'wan_tc_selector'
+class WanTcFilter(model_base.BASEV2,
+                  model_base.HasId, model_base.HasProject):
+    __tablename__ = 'wan_tc_filter'
     class_id = sa.Column(sa.String(36),
                          sa.ForeignKey('wan_tc_class.id',
                                        ondelete='CASCADE'),
