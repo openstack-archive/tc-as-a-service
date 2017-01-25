@@ -84,7 +84,8 @@ class WanQosPlugin(wanqos.WanQosPluginBase,
     def get_wan_tc_devices(self, context, filters=None, fields=None,
                            sorts=None, limit=None, marker=None,
                            page_reverse=False):
-        return self.db.get_all_devices(context)
+        return self.db.get_all_devices(context, filters, fields, sorts, limit,
+                                       marker, page_reverse)
 
     def get_plugin_type(self):
         """Get type of the plugin."""

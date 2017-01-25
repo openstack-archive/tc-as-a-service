@@ -81,13 +81,18 @@ class WanTcDb(object):
         else:
             LOG.error('Got heartbeat for non-existing device: %s' % host)
 
-    def get_all_devices(self, context):
-        device_list = context.session.query(models.WanTcDevice).all()
-        device_list_dict = []
-        for device in device_list:
-            device_list_dict.append(self._device_to_dict(device))
-
-        return device_list_dict
+    def get_all_devices(self, context, filters=None,
+                        fields=None,
+                        sorts=None, limit=None, marker=None,
+                        page_reverse=False):
+        marker_obj = self._get_marker_obj(
+            context, 'wan_tc_device', limit, marker)
+        return self._get_collection(context, models.WanTcDevice,
+                                    self._device_to_dict,
+                                    filters=filters, fields=fields,
+                                    sorts=sorts, limit=limit,
+                                    marker_obj=marker_obj,
+                                    page_reverse=page_reverse)
 
     def get_last_class_ext_id(self, context):
 
