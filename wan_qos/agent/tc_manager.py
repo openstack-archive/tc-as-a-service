@@ -121,3 +121,9 @@ class TcAgentManager(manager.Manager):
         if wtc_class['direction'] == 'out' or wtc_class['direction'] == 'both':
             tc_dict['port_side'] = 'wan_port'
             self.agent.remove_traffic_class(tc_dict)
+
+    def create_wtc_filter(self, context, wtc_filter):
+        pass
+
+    def delete_wtc_filter(self, context, wtc_filter):
+        pass

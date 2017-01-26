@@ -19,6 +19,8 @@ from oslo_utils import uuidutils
 from oslo_utils import timeutils
 from oslo_log import log as logging
 
+import sqlalchemy as sa
+
 from neutron import context as ctx
 from neutron.db.models import segment
 from neutron_lib import exceptions
@@ -233,64 +235,6 @@ class WanTcDb(object):
             parent_class['child_list'].append(child_class)
             self._get_child_classes(context, child_class)
 
-    def _get_collection(self, context, model, dict_func, filters=None,
-                        fields=None, sorts=None, limit=None, marker_obj=None,
-                        page_reverse=False):
-        """Get collection object based on query for resources."""
-        query = self._get_collection_query(context, model, filters=filters,
-                                           sorts=sorts,
-                                           limit=limit,
-                                           marker_obj=marker_obj,
-                                           page_reverse=page_reverse)
-        items = [dict_func(c, fields) for c in query]
-        if limit and page_reverse:
-            items.reverse()
-        return items
-
-    def _get_collection_query(self, context, model, filters=None,
-                              sorts=None, limit=None, marker_obj=None,
-                              page_reverse=False):
-        """Get collection query for the models."""
-        collection = self._model_query(context, model)
-        collection = self._apply_filters_to_query(collection, model, filters)
-        return collection
-
-    def _get_marker_obj(self, context, resource, limit, marker):
-        """Get marker object for the resource."""
-        if limit and marker:
-            return getattr(self, '_get_%s' % resource)(context, marker)
-        return None
-
-    def _fields(self, resource, fields):
-        """Get fields for the resource for get query."""
-        if fields:
-            return dict(((key, item) for key, item in resource.items()
-                         if key in fields))
-        return resource
-
-    def _model_query(self, context, model):
-        """Query model based on filter."""
-        query = context.session.query(model)
-        query_filter = None
-        if not context.is_admin and hasattr(model, 'tenant_id'):
-            if hasattr(model, 'shared'):
-                query_filter = ((model.tenant_id == context.tenant_id) |
-                                (model.shared == sa.true()))
-            else:
-                query_filter = (model.tenant_id == context.tenant_id)
-        if query_filter is not None:
-            query = query.filter(query_filter)
-        return query
-
-    def _apply_filters_to_query(self, query, model, filters):
-        """Apply filters to query for the models."""
-        if filters:
-            for key, value in filters.items():
-                column = getattr(model, key, None)
-                if column:
-                    query = query.filter(column.in_(value))
-        return query
-
     def create_wan_tc_filter(self, context, wan_tc_filter):
 
         wtc_filter_db = models.WanTcFilter(
@@ -334,3 +278,68 @@ class WanTcDb(object):
                                     sorts=sorts, limit=limit,
                                     marker_obj=marker_obj,
                                     page_reverse=page_reverse)
+
+    def delete_wan_tc_filter(self, context, id):
+        filter_db = context.session.query(models.WanTcFilter).filter_by(
+            id=id
+        ).first()
+        if filter_db:
+            with context.session.begin(subtransactions=True):
+                context.session.delete(filter_db)
+        else:
+            LOG.error('Trying to delete none existing tc filter. id=%s' % id)
+
+    def _get_collection(self, context, model, dict_func, filters=None,
+                        fields=None, sorts=None, limit=None, marker_obj=None,
+                        page_reverse=False):
+        """Get collection object based on query for resources."""
+        if not self._has_attribute(model, filters):
+            return []
+        query = self._get_collection_query(context, model, filters=filters,
+                                           sorts=sorts,
+                                           limit=limit,
+                                           marker_obj=marker_obj,
+                                           page_reverse=page_reverse)
+        items = [dict_func(c, fields) for c in query]
+        if limit and page_reverse:
+            items.reverse()
+        return items
+
+    def _has_attribute(self, model, filters):
+        for key in filters.keys():
+            if not hasattr(model, key):
+                return False
+        return True
+
+    def _get_collection_query(self, context, model, filters=None,
+                              sorts=None, limit=None, marker_obj=None,
+                              page_reverse=False):
+        """Get collection query for the models."""
+        collection = self._model_query(context, model)
+        collection = self._apply_filters_to_query(collection, model, filters)
+        return collection
+
+    def _get_marker_obj(self, context, resource, limit, marker):
+        """Get marker object for the resource."""
+        if limit and marker:
+            return getattr(self, '_get_%s' % resource)(context, marker)
+        return None
+
+    def _model_query(self, context, model):
+        """Query model based on filter."""
+        query = context.session.query(model)
+        query_filter = None
+        if not context.is_admin and hasattr(model, 'tenant_id'):
+            query_filter = (model.tenant_id == context.tenant_id)
+        if query_filter is not None:
+            query = query.filter(query_filter)
+        return query
+
+    def _apply_filters_to_query(self, query, model, filters):
+        """Apply filters to query for the models."""
+        if filters:
+            for key, value in filters.items():
+                column = getattr(model, key, None)
+                if column:
+                    query = query.filter(column.in_(value))
+        return query

@@ -122,7 +122,7 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
                                        marker, page_reverse)
 
     def delete_wan_tc_filter(self, context, id):
-        pass
+        self.db.delete_wan_tc_filter(context, id)
 
     def get_wan_tc_filters(self, context, filters=None, fields=None,
                            sorts=None, limit=None, marker=None,
