@@ -78,13 +78,16 @@ class TcDriver(agent_api.AgentInterface):
         check_call(cmd, shell=True)
 
     def _create_or_update_class(self, tc_dict):
-        cmd = 'sudo tc class %s dev %s parent 1:%s classid 1:%s htb' \
-              ' rate %s' % (
-                  tc_dict['command'],
-                  self.ports[tc_dict['port_side']],
-                  tc_dict['parent'], tc_dict['child'],
-                  tc_dict['min']
+        cmd = 'sudo tc class %s dev %s parent 1:%s classid 1:%s htb' % (
+            tc_dict['command'],
+            self.ports[tc_dict['port_side']],
+            tc_dict['parent'], tc_dict['child']
+
         )
+        if 'min' in tc_dict:
+            cmd += ' rate %s' % tc_dict['min']
+        else:
+            cmd += ' rate 1kbit'
         if 'max' in tc_dict:
             cmd += ' ceil %s' % tc_dict['max']
         check_call(cmd, shell=True)
