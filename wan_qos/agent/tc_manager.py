@@ -60,11 +60,16 @@ class TcAgentManager(manager.Manager):
             'max_rate': self.conf.WANTC.wan_max_rate
         }
         self.agent.set_root_queue(tc_dict)
+        context = ctx.get_admin_context()
         agent_conf = self.plugin_rpc.get_configuration_from_db(
-            ctx.get_admin_context())
+            context)
         class_tree = agent_conf['class_tree']
         if class_tree['id'] == 'root':
             self.init_child_classes(class_tree['child_list'])
+
+            if 'filters' in agent_conf:
+                for filter in agent_conf['filters']:
+                    self.create_wtc_filter(context, filter)
             return
         raise exceptions.InvalidInput(error_message='Did not get root class')
 
@@ -124,7 +129,8 @@ class TcAgentManager(manager.Manager):
 
     def create_wtc_filter(self, context, wtc_filter):
 
-        wtc_class = wtc_filter['class']
+        wtc_class = self.plugin_rpc.get_class_by_id(context,
+                                                    wtc_filter['class_id'])
 
         tc_dict = {
             'child': wtc_class['class_ext_id'],

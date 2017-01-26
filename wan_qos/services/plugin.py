@@ -51,10 +51,14 @@ class PluginRpcCallback(object):
 
     def get_configuration_from_db(self, context, host):
         conf = {
-            'class_tree': self.plugin.db.get_class_tree()
+            'class_tree': self.plugin.db.get_class_tree(),
+            'filters': self.plugin.db.get_wan_tc_filters(context)
         }
 
         return conf
+
+    def get_class_by_id(self, context, id):
+        return self.plugin.db.get_class_by_id(context, id)
 
 
 class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
@@ -140,8 +144,8 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
         wtc_filter = self.db.create_wan_tc_filter(context,
                                                   wan_tc_filter[
                                                       'wan_tc_filter'])
-        wtc_class = self.get_wan_tc_class(context, wtc_filter['class_id'])
-        wtc_filter['class'] = wtc_class
+        # wtc_class = self.get_wan_tc_class(context, wtc_filter['class_id'])
+        # wtc_filter['class'] = wtc_class
         self.agent_rpc.create_wtc_filter(context, wtc_filter)
         return wtc_filter
 

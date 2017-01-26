@@ -45,6 +45,10 @@ class TcPluginApi(object):
         cctxt = self.client.prepare()
         return cctxt.call(context, 'get_configuration_from_db', host=self.host)
 
+    def get_class_by_id(self, context, id):
+        cctxt = self.client.prepare()
+        return cctxt.call(context, 'get_class_by_id', id=id)
+
 
 class TcAgentApi(object):
     def __init__(self, host, topic=topics.TC_AGENT):

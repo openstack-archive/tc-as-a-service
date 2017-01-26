@@ -306,9 +306,10 @@ class WanTcDb(object):
         return items
 
     def _has_attribute(self, model, filters):
-        for key in filters.keys():
-            if not hasattr(model, key):
-                return False
+        if filters:
+            for key in filters.keys():
+                if not hasattr(model, key):
+                    return False
         return True
 
     def _get_collection_query(self, context, model, filters=None,
