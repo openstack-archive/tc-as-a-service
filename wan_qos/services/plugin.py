@@ -122,7 +122,12 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
                                        marker, page_reverse)
 
     def delete_wan_tc_filter(self, context, id):
-        self.db.delete_wan_tc_filter(context, id)
+        wtc_filter = self.get_wan_tc_filter(context, id)
+        if wtc_filter:
+            wtc_class = self.get_wan_tc_class(context, wtc_filter['class_id'])
+            self.db.delete_wan_tc_filter(context, id)
+            wtc_filter['class'] = wtc_class
+            self.agent_rpc.delete_wtc_filter(context, wtc_filter)
 
     def get_wan_tc_filters(self, context, filters=None, fields=None,
                            sorts=None, limit=None, marker=None,
@@ -132,8 +137,13 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
                                           marker, page_reverse)
 
     def create_wan_tc_filter(self, context, wan_tc_filter):
-        return self.db.create_wan_tc_filter(context,
-                                            wan_tc_filter['wan_tc_filter'])
+        wtc_filter = self.db.create_wan_tc_filter(context,
+                                                  wan_tc_filter[
+                                                      'wan_tc_filter'])
+        wtc_class = self.get_wan_tc_class(context, wtc_filter['class_id'])
+        wtc_filter['class'] = wtc_class
+        self.agent_rpc.create_wtc_filter(context, wtc_filter)
+        return wtc_filter
 
     def update_wan_tc_filter(self, context, id, wan_tc_filter):
         pass

@@ -18,6 +18,8 @@ from subprocess import check_call
 
 from oslo_log import log as logging
 
+from neutron_lib import exceptions
+
 import agent_api
 
 LOG = logging.getLogger(__name__)
@@ -68,7 +70,7 @@ class TcDriver(agent_api.AgentInterface):
 
     def remove_traffic_class(self, tc_dict, with_filter=False):
         if with_filter:
-            self._delete_filter(tc_dict)
+            self.remove_filter(tc_dict)
         cmd = 'sudo tc class del dev %s classid 1:%s' % (
             self.ports[tc_dict['port_side']],
             tc_dict['child']
@@ -88,19 +90,27 @@ class TcDriver(agent_api.AgentInterface):
         check_call(cmd, shell=True)
 
     def create_filter(self, tc_dict):
+
+        if tc_dict['protocol'] == 'vxlan':
+            self._create_vxlan_filter(tc_dict)
+            return
+
+        raise exceptions.BadRequest(msg='Protocol not supported')
+
+    def _create_vxlan_filter(self, tc_dict):
+        vni = tc_dict['match'].split('=')[1]
         cmd = 'sudo tc filter add dev %s parent 1:0' % (
             self.ports[tc_dict['port_side']])
         cmd += ' protocol ip prio 1 u32'
-        if tc_dict['protocol'] and tc_dict['protocol'] == 'vxlan':
-            cmd += ' match ip protocol 17 0xFF'  # UDP
-            cmd += ' match u16 0x12B5 0xFFFF at 22'  # VxLAN port
-            cmd += ' match u32 0x%0.6X00 0xFFFFFF00 at 32' % tc_dict['vni']
-            cmd += ' flowid 1:%s' % tc_dict['child']
+        cmd += ' match ip protocol 17 0xFF'  # UDP
+        cmd += ' match u16 0x12B5 0xFFFF at 22'  # VxLAN port
+        cmd += ' match u32 0x%0.6X00 0xFFFFFF00 at 32' % int(vni)
+        cmd += ' flowid 1:%s' % tc_dict['child']
         LOG.debug('creating filter: %s' % cmd)
         check_call(cmd, shell=True)
 
-    def _delete_filter(self, tc_dict):
+    def remove_filter(self, tc_dict):
         cmd = 'sudo tc filter del dev %s ' % self.ports[tc_dict['port_side']]
         cmd += ' parent 1:0 protocol ip prio 1 u32'
-        cmd += ' flowid %s:%s' % (tc_dict['parent'], tc_dict['child'])
+        cmd += ' flowid 1:%s' % tc_dict['child']
         check_call(cmd, shell=True)

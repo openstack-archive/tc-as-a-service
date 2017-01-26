@@ -51,3 +51,7 @@ class AgentInterface(object):
     def create_filter(self, tc_dict):
         """ create traffic filter that is used to route packets to the
         right queue"""
+
+    @abc.abstractmethod
+    def remove_filter(self, tc_dict):
+        """ remove traffic filter """

@@ -123,7 +123,36 @@ class TcAgentManager(manager.Manager):
             self.agent.remove_traffic_class(tc_dict)
 
     def create_wtc_filter(self, context, wtc_filter):
-        pass
+
+        wtc_class = wtc_filter['class']
+
+        tc_dict = {
+            'child': wtc_class['class_ext_id'],
+            'protocol': wtc_filter['protocol'],
+            'match': wtc_filter['match']
+        }
+
+        port_side = wtc_class['direction']
+
+        if port_side == 'both' or port_side == 'in':
+            tc_dict['port_side'] = 'lan_port'
+            self.agent.create_filter(tc_dict)
+        if port_side == 'both' or port_side == 'out':
+            tc_dict['port_side'] = 'wan_port'
+            self.agent.create_filter(tc_dict)
 
     def delete_wtc_filter(self, context, wtc_filter):
-        pass
+
+        wtc_class = wtc_filter['class']
+        port_side = wtc_class['direction']
+
+        tc_dict = {
+            'child': wtc_class['class_ext_id']
+        }
+
+        if port_side == 'both' or port_side == 'in':
+            tc_dict['port_side'] = 'lan_port'
+            self.agent.remove_filter(tc_dict)
+        if port_side == 'both' or port_side == 'out':
+            tc_dict['port_side'] = 'wan_port'
+            self.agent.remove_filter(tc_dict)
