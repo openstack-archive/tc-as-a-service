@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from neutron_lib.plugins import directory
 from neutron.common import rpc as n_rpc
 from neutron.db import agents_db
 from neutron_lib import exceptions
@@ -30,6 +31,7 @@ from wan_qos.db import wan_qos_db
 from wan_qos.extensions import wantcfilter
 from wan_qos.extensions import wantcdevice
 from wan_qos.extensions import wantcclass
+from wan_qos.extensions import wantc
 
 LOG = logging.getLogger(__name__)
 
@@ -63,9 +65,10 @@ class PluginRpcCallback(object):
 
 class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
                    wantcdevice.WanTcDevicePluginBase,
-                   wantcclass.WanTcClassPluginBase):
+                   wantcclass.WanTcClassPluginBase,
+                   wantc.WanTcPluginBase):
     supported_extension_aliases = ['wan-tc-filter', 'wan-tc-device',
-                                   'wan-tc-class']
+                                   'wan-tc-class', 'wan-tc']
 
     def __init__(self):
         self.db = wan_qos_db.WanTcDb()
@@ -87,6 +90,10 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
     def get_plugin_description(self):
         """Get description of the plugin."""
         return 'Plugin for rate limiting on WAN links.'
+
+    @property
+    def _core_plugin(self):
+        return directory.get_plugin()
 
     def delete_wan_tc_device(self, context, id):
         self.db.delete_wan_tc_device(context, id)
@@ -167,3 +174,67 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
         else:
             tenant_id = context.tenant_id
         return tenant_id
+
+    def get_wan_tc(self, context, id, fields=None):
+        filter_db = self.get_wan_tc_filter(context, id, fields)
+        class_db = self.get_wan_tc_class(context, filter_db['class_id'])
+        filter_db['min'] = class_db['min']
+        filter_db['max'] = class_db['max']
+        return filter_db
+
+    def get_wan_tcs(self, context, filters=None, fields=None, sorts=None,
+                    limit=None, marker=None, page_reverse=False):
+        filters = self.get_wan_tc_filters(context, filters, fields, sorts,
+                                          limit, marker, page_reverse)
+        for filter_db in filters:
+            class_db = self.get_wan_tc_class(context, filter_db['class_id'])
+            filter_db['min'] = class_db['min']
+            filter_db['max'] = class_db['max']
+
+        return filters
+
+    def create_wan_tc(self, context, wan_tc):
+        LOG.debug('got WAN_TC: %s' % wan_tc)
+        wan_tc_req = wan_tc['wan_tc']
+
+        filter_db = self.get_wan_tc_filters(context, filters={
+            'network': [wan_tc_req['network']]})
+        if filter_db:
+            raise exceptions.InvalidInput(
+                error_message='Network already has limiter')
+
+        network = self._core_plugin.get_network(context, wan_tc_req['network'])
+        if network['provider:network_type'] != 'vxlan':
+            raise exceptions.InvalidInput()
+        vni = network['provider:segmentation_id']
+        tc_class = {'wan_tc_class': {
+            'direction': 'both',
+            'min': wan_tc_req['min']
+        }
+        }
+
+        if 'max' in wan_tc_req:
+            tc_class['wan_tc_class']['max'] = wan_tc_req['max']
+
+        tc_class_db = self.create_wan_tc_class(context, tc_class)
+        tc_filter_req = {'wan_tc_filter': {
+            'protocol': 'vxlan',
+            'match': 'vni=%s' % vni,
+            'class_id': tc_class_db['id'],
+            'network': network['id']
+        }
+        }
+        tc_filter_db = self.create_wan_tc_filter(context, tc_filter_req)
+        tc_filter_db['min'] = tc_class_db['min']
+        tc_filter_db['max'] = tc_class_db['max']
+        return tc_filter_db
+
+    def update_wan_tc(self, context, id, wan_tc):
+        raise exceptions.BadRequest(msg='Not implemented yet!')
+
+    def delete_wan_tc(self, context, id):
+        LOG.debug('Deleting TC: %s' % id)
+        tc_filter = self.get_wan_tc_filter(context, id)
+        class_id = tc_filter['class_id']
+        self.delete_wan_tc_filter(context, id)
+        self.delete_wan_tc_class(context, class_id)

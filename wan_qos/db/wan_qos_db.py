@@ -244,6 +244,9 @@ class WanTcDb(object):
             class_id=wan_tc_filter['class_id']
         )
 
+        if 'network' in wan_tc_filter:
+            wtc_filter_db.network = wan_tc_filter['network']
+
         with context.session.begin(subtransactions=True):
             context.session.add(wtc_filter_db)
 
@@ -254,7 +257,8 @@ class WanTcDb(object):
             'id': wtc_filter_db.id,
             'protocol': wtc_filter_db.protocol,
             'match': wtc_filter_db.match,
-            'class_id': wtc_filter_db.class_id
+            'class_id': wtc_filter_db.class_id,
+            'network': wtc_filter_db.network
         }
 
         return wtc_filter

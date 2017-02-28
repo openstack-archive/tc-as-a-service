@@ -23,3 +23,6 @@ WAN_TC_CLASS_PATH = 'wan-tc-classs'
 
 WAN_TC_FILTER = 'wan_tc_filter'
 WAN_TC_FILTER_PATH = 'wan-tc-filters'
+
+WAN_TC = 'wan_tc'
+WAN_TC_PATH = 'wan-tcs'

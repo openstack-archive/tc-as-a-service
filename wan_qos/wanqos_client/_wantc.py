@@ -1,4 +1,4 @@
-# Copyright 2016 Huawei corp.
+# Copyright 2017 Huawei corp.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -22,34 +22,33 @@ from neutronclient.common import exceptions
 from wan_qos.common import constants
 
 
-class WanTcClass(extension.NeutronClientExtension):
-    resource = constants.WAN_TC_CLASS
-    resource_plural = '%ss' % constants.WAN_TC_CLASS
-    path = constants.WAN_TC_CLASS_PATH
+class WanTc(extension.NeutronClientExtension):
+    resource = constants.WAN_TC
+    resource_plural = '%ss' % constants.WAN_TC
+    path = constants.WAN_TC_PATH
     object_path = '/%s' % path
     resource_path = '/%s/%%s' % path
     versions = ['2.0']
 
 
-class WanTcClassShow(extension.ClientExtensionShow, WanTcClass):
-    shell_command = 'wan-tc-class-show'
+class WanTcShow(extension.ClientExtensionShow, WanTc):
+    shell_command = 'wan-tc-show'
 
 
-class WanTcClassList(extension.ClientExtensionList, WanTcClass):
-    shell_command = 'wan-tc-class-list'
-    list_columns = ['id', 'parent', 'direction', 'min', 'max']
+class WanTcList(extension.ClientExtensionList, WanTc):
+    shell_command = 'wan-tc-list'
+    list_columns = ['id', 'network', 'min', 'max']
     pagination_support = True
     sorting_support = True
 
 
-class WanTcClassCreate(extension.ClientExtensionCreate, WanTcClass):
-    shell_command = 'wan-tc-class-create'
+class WanTcCreate(extension.ClientExtensionCreate, WanTc):
+    shell_command = 'wan-tc-create'
 
     def add_known_arguments(self, parser):
         parser.add_argument(
-            'direction', metavar='<DIRECTION>',
-            choices=['both', 'in', 'out'],
-            help=_('The direction for the limiter. Can be both/in/out'))
+            'network', metavar='<network>',
+            help=_('Network ID'))
         parser.add_argument(
             '--min',
             dest='min',
@@ -58,38 +57,30 @@ class WanTcClassCreate(extension.ClientExtensionCreate, WanTcClass):
             '--max',
             dest='max',
             help=_('Set maximum rate. (mbit / kbit)'))
-        parser.add_argument(
-            '--parent',
-            dest='parent',
-            help=_('Set the parent class of this class. Omit if root.'))
 
     def args2body(self, parsed_args):
 
         body = {
-            'direction': parsed_args.direction
+            'network': parsed_args.network
         }
 
         if parsed_args.min:
             body['min'] = parsed_args.min
         else:
-            if not parsed_args.max:
-                raise exceptions.BadRequest('Either min or max must be set')
+            raise exceptions.BadRequest('min must be set')
 
         if parsed_args.max:
             body['max'] = parsed_args.max
 
-        if parsed_args.parent:
-            body['parent'] = parsed_args.parent
-
         return {self.resource: body}
 
 
-class WanTcClassDelete(extension.ClientExtensionDelete, WanTcClass):
-    shell_command = 'wan-tc-class-delete'
+class WanTcDelete(extension.ClientExtensionDelete, WanTc):
+    shell_command = 'wan-tc-delete'
 
 
-class WanTcClassUpdate(extension.ClientExtensionUpdate, WanTcClass):
-    shell_command = 'wan-tc-class-update'
+class WanTcUpdate(extension.ClientExtensionUpdate, WanTc):
+    shell_command = 'wan-tc-update'
 
     def add_known_arguments(self, parser):
         pass
