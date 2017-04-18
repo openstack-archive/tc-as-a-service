@@ -15,16 +15,15 @@
 
 import sys
 
+import eventlet
+from neutron.common import config as common_config
+from neutron.conf.agent import common as config
+from neutron import service as neutron_service
 from oslo_config import cfg
 from oslo_service import service
 
-from neutron.conf.agent import common as config
-from neutron.common import config as common_config
-from neutron import service as neutron_service
-
 from wan_qos.common import topics
 
-import eventlet
 eventlet.monkey_patch()
 
 WANTC_OPTS = [
@@ -53,6 +52,7 @@ def main():
         report_interval=10,
         manager='wan_qos.agent.tc_manager.TcAgentManager')
     service.launch(cfg.CONF, server).wait()
+
 
 if __name__ == '__main__':
     main()

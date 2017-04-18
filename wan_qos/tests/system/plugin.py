@@ -14,24 +14,19 @@
 #    under the License.
 
 
-import time
 import sys
-
-from oslo_config import cfg
-from oslo_service import service
+import time
 
 from neutron.agent.common import config
 from neutron.common import config as common_config
-from neutron import service as neutron_service
 
-from wan_qos.common import topics
 from wan_qos.services import plugin
 
 
 def main():
     common_config.init(sys.argv[1:])
     config.setup_logging()
-    wanqos_plugin = plugin.WanQosPlugin()
+    plugin.WanQosPlugin()
     while True:
         time.sleep(3)
 

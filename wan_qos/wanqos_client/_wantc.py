@@ -15,9 +15,8 @@
 
 
 from neutronclient._i18n import _
-
-from neutronclient.common import extension
 from neutronclient.common import exceptions
+from neutronclient.common import extension
 
 from wan_qos.common import constants
 

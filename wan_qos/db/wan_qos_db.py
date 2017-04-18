@@ -15,18 +15,13 @@
 
 import threading
 
-from oslo_utils import uuidutils
-from oslo_utils import timeutils
-from oslo_log import log as logging
-
-import sqlalchemy as sa
-
 from neutron import context as ctx
-from neutron.db.models import segment
 from neutron_lib import exceptions
+from oslo_log import log as logging
+from oslo_utils import timeutils
+from oslo_utils import uuidutils
 
 from wan_qos.db.models import wan_tc as models
-from wan_qos.common import constants
 
 LOG = logging.getLogger(__name__)
 
@@ -58,7 +53,7 @@ class WanTcDb(object):
 
         with context.session.begin(subtransactions=True):
             if not device:
-                LOG.debug('New device connected: %s' % host_info)
+                LOG.debug('New device connected: %s', host_info)
                 now = timeutils.utcnow()
                 wan_tc_device = models.WanTcDevice(
                     id=uuidutils.generate_uuid(),
@@ -70,7 +65,7 @@ class WanTcDb(object):
                 )
                 return context.session.add(wan_tc_device)
             else:
-                LOG.debug('updating uptime for device: %s' % host_info['host'])
+                LOG.debug('updating uptime for device: %s', host_info['host'])
                 device.uptime = timeutils.utcnow()
 
     def device_heartbeat(self, context, host):
@@ -81,7 +76,7 @@ class WanTcDb(object):
             with context.session.begin(subtransactions=True):
                 device.heartbeat_timestamp = timeutils.utcnow()
         else:
-            LOG.error('Got heartbeat for non-existing device: %s' % host)
+            LOG.error('Got heartbeat for non-existing device: %s', host)
 
     def get_all_devices(self, context, filters=None,
                         fields=None,
@@ -209,7 +204,7 @@ class WanTcDb(object):
             with context.session.begin(subtransactions=True):
                 context.session.delete(device)
         else:
-            LOG.error('Trying to delete none existing device. id=%s' % id)
+            LOG.error('Trying to delete none existing device. id=%s', id)
 
     def get_device(self, context, id):
         device = context.session.query(models.WanTcDevice).filter_by(
@@ -291,7 +286,7 @@ class WanTcDb(object):
             with context.session.begin(subtransactions=True):
                 context.session.delete(filter_db)
         else:
-            LOG.error('Trying to delete none existing tc filter. id=%s' % id)
+            LOG.error('Trying to delete none existing tc filter. id=%s', id)
 
     def _get_collection(self, context, model, dict_func, filters=None,
                         fields=None, sorts=None, limit=None, marker_obj=None,

@@ -15,8 +15,8 @@
 
 import abc
 
-from neutron_lib.api import extensions
 from neutron.api.v2 import resource_helper
+from neutron_lib.api import extensions
 
 from wan_qos.common import constants
 
@@ -60,7 +60,7 @@ class Wantcfilter(extensions.ExtensionDescriptor):
 
     @classmethod
     def get_resources(cls):
-        """Returns Ext Resources."""
+        "Returns Ext Resources."
 
         mem_actions = {}
         plural_mappings = resource_helper.build_plural_mappings(

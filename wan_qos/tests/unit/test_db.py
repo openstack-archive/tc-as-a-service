@@ -1,8 +1,5 @@
 from neutron import context as ctx
-from neutron.tests import base
 from neutron.tests.unit import testlib_api
-
-from oslo_config import cfg
 
 from wan_qos.db import wan_qos_db
 from wan_qos.services import plugin
@@ -28,8 +25,8 @@ class TestTcDb(testlib_api.SqlTestCase):
         class_db_1 = self._add_class(None, 'both', '1mbit', '2mbit')
         class_db_2 = self._add_class(class_db_1['id'], 'both', '2mbit',
                                      '3mbit')
-        class_db_3 = self._add_class(class_db_2['id'], 'both', '3mbit',
-                                     '4mbit')
+        self._add_class(class_db_2['id'], 'both', '3mbit',
+                        '4mbit')
 
         class_by_id = self.db.get_class_by_id(self.context, class_db_1['id'])
         # class_by_id = self.db.get_class_by_id(self.context, '111')
@@ -102,14 +99,13 @@ class TestPlugin(testlib_api.SqlTestCase):
         class_db_1 = self._add_class(None, 'both', '1mbit', '2mbit')
         class_db_2 = self._add_class(class_db_1['id'], 'both', '2mbit',
                                      '3mbit')
-        class_db_3 = self._add_class(class_db_2['id'], 'both', '3mbit',
-                                     '4mbit')
+        self._add_class(class_db_2['id'], 'both', '3mbit',
+                        '4mbit')
 
         tc_class = self.plugin.get_wan_tc_class(ctx.get_admin_context(),
                                                 class_db_1['id'])
 
         print(tc_class)
-        filters = {'id': [class_db_1['id']]}
         tc_classes = self.plugin.get_wan_tc_classs(ctx.get_admin_context())
 
         print(tc_classes)
@@ -134,12 +130,6 @@ class TestPlugin(testlib_api.SqlTestCase):
                                                    filters=filters)
 
         print(tc_classes)
-
-
-
-
-
-
 
     def test_add_filter(self):
 

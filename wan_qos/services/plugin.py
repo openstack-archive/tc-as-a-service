@@ -13,25 +13,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from neutron_lib.plugins import directory
 from neutron.common import rpc as n_rpc
 from neutron.db import agents_db
 from neutron_lib import exceptions
-
+from neutron_lib.plugins import directory
 from oslo_config import cfg
 from oslo_log import log as logging
-from oslo_utils import importutils
-
 import oslo_messaging as messaging
+from oslo_utils import importutils
 
 from wan_qos.common import api
 from wan_qos.common import constants
 from wan_qos.common import topics
 from wan_qos.db import wan_qos_db
-from wan_qos.extensions import wantcfilter
-from wan_qos.extensions import wantcdevice
-from wan_qos.extensions import wantcclass
 from wan_qos.extensions import wantc
+from wan_qos.extensions import wantcclass
+from wan_qos.extensions import wantcdevice
+from wan_qos.extensions import wantcfilter
 
 LOG = logging.getLogger(__name__)
 
@@ -45,7 +43,7 @@ class PluginRpcCallback(object):
         LOG.debug('rpc callback started.')
 
     def agent_up_notification(self, context, host_info):
-        LOG.debug('got up notification from %s' % host_info['host'])
+        LOG.debug('got up notification from %s', host_info['host'])
         self.plugin.db.agent_up_notification(context, host_info)
 
     def device_heartbeat(self, context, host):
@@ -114,7 +112,7 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
         pass
 
     def create_wan_tc_class(self, context, wan_tc_class):
-        LOG.debug('got new class request: %s' % wan_tc_class)
+        LOG.debug('got new class request: %s', wan_tc_class)
         wtc_class_db = self.db.create_wan_tc_class(context,
                                                    wan_tc_class[
                                                        'wan_tc_class'])
@@ -122,7 +120,7 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
         return wtc_class_db
 
     def delete_wan_tc_class(self, context, id):
-        LOG.debug('Got request to delete class id: %s' % id)
+        LOG.debug('Got request to delete class id: %s', id)
         class_tree = self.db.get_class_tree(id)
         self.db.delete_wtc_class(context, id)
         self.agent_rpc.delete_wtc_class(context, class_tree)
@@ -167,8 +165,10 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
         """Get tenant id for creation of resources."""
         if context.is_admin and 'tenant_id' in resource:
             tenant_id = resource['tenant_id']
-        elif ('tenant_id' in resource and
-                      resource['tenant_id'] != context.tenant_id):
+        elif (
+            'tenant_id' in resource and
+            resource['tenant_id'] != context.tenant_id
+        ):
             reason = 'Cannot create resource for another tenant'
             raise exceptions.AdminRequired(reason=reason)
         else:
@@ -194,7 +194,7 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
         return filters
 
     def create_wan_tc(self, context, wan_tc):
-        LOG.debug('got WAN_TC: %s' % wan_tc)
+        LOG.debug('got WAN_TC: %s', wan_tc)
         wan_tc_req = wan_tc['wan_tc']
 
         filter_db = self.get_wan_tc_filters(context, filters={
@@ -233,7 +233,7 @@ class WanQosPlugin(wantcfilter.WanTcFilterPluginBase,
         raise exceptions.BadRequest(msg='Not implemented yet!')
 
     def delete_wan_tc(self, context, id):
-        LOG.debug('Deleting TC: %s' % id)
+        LOG.debug('Deleting TC: %s', id)
         tc_filter = self.get_wan_tc_filter(context, id)
         class_id = tc_filter['class_id']
         self.delete_wan_tc_filter(context, id)

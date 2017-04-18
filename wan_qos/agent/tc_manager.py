@@ -86,7 +86,7 @@ class TcAgentManager(manager.Manager):
         self.plugin_rpc.device_heartbeat(context, self.host)
 
     def create_wtc_class(self, context, wtc_class_dict):
-        LOG.debug('got request for new class: %s' % wtc_class_dict)
+        LOG.debug('got request for new class: %s', wtc_class_dict)
         class_dict = {
             'parent': wtc_class_dict['parent_class_ext_id'],
             'child': wtc_class_dict['class_ext_id']
@@ -97,12 +97,16 @@ class TcAgentManager(manager.Manager):
             class_dict['min'] = wtc_class_dict['min']
         if wtc_class_dict['max']:
             class_dict['max'] = wtc_class_dict['max']
-        if wtc_class_dict['direction'] == 'in' or wtc_class_dict[
-            'direction'] == 'both':
+        if (
+            wtc_class_dict['direction'] == 'in' or
+            wtc_class_dict['direction'] == 'both'
+        ):
             class_dict['port_side'] = 'lan_port'
             self._create_wtc_class(class_dict)
-        if wtc_class_dict['direction'] == 'out' or wtc_class_dict[
-            'direction'] == 'both':
+        if (
+            wtc_class_dict['direction'] == 'out' or
+            wtc_class_dict['direction'] == 'both'
+        ):
             class_dict['port_side'] = 'wan_port'
             self._create_wtc_class(class_dict)
 

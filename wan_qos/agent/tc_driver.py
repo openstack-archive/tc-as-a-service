@@ -13,14 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from subprocess import call
-from subprocess import check_call
-
-from oslo_log import log as logging
+import subprocess
 
 from neutron_lib import exceptions
+from oslo_log import log as logging
 
-import agent_api
+from wan_qos.agent import agent_api
 
 LOG = logging.getLogger(__name__)
 
@@ -38,19 +36,20 @@ class TcDriver(agent_api.AgentInterface):
 
     def clear_all(self):
         for port in self.ports.values():
-            call('sudo tc qdisc del dev %s root' % port, shell=True)
+            subprocess.call('sudo tc qdisc del dev %s root' % port, shell=True)
 
     def set_root_queue(self, tc_dict):
-        check_call('sudo tc qdisc add dev %s handle 1: root htb' %
-                   self.ports[tc_dict['port_side']], shell=True)
+        subprocess.check_call('sudo tc qdisc add dev %s handle 1: root htb' %
+                              self.ports[tc_dict['port_side']], shell=True)
         class_str = 'sudo tc class add dev %s parent 1: classid 1:1 ' \
                     'htb rate %s ceil %s'
-        check_call(class_str % (self.ports[tc_dict['port_side']],
-                                str(tc_dict['max_rate']),
-                                str(tc_dict['max_rate'])), shell=True)
+        subprocess.check_call(class_str % (self.ports[tc_dict['port_side']],
+                                           str(tc_dict['max_rate']),
+                                           str(tc_dict['max_rate'])),
+                              shell=True)
 
     def create_traffic_class(self, tc_dict):
-        """ Create new traffic class.
+        """Create new traffic class.
         Parameters:
             port_side - lan_port / wan_port
             parent - the parent class
@@ -59,7 +58,8 @@ class TcDriver(agent_api.AgentInterface):
             max - maximum traffic rate. if not provide, the maximum rate will
                 be limitted by parent maximum rate.
         """
-        LOG.debug('got request for new class: %s' % tc_dict)
+
+        LOG.debug('got request for new class: %s', tc_dict)
         tc_dict['command'] = 'add'
         self._create_or_update_class(tc_dict)
         LOG.debug('new class created.')
@@ -75,7 +75,7 @@ class TcDriver(agent_api.AgentInterface):
             self.ports[tc_dict['port_side']],
             tc_dict['child']
         )
-        check_call(cmd, shell=True)
+        subprocess.check_call(cmd, shell=True)
 
     def _create_or_update_class(self, tc_dict):
         cmd = 'sudo tc class %s dev %s parent 1:%s classid 1:%s htb' % (
@@ -90,7 +90,7 @@ class TcDriver(agent_api.AgentInterface):
             cmd += ' rate 1kbit'
         if 'max' in tc_dict:
             cmd += ' ceil %s' % tc_dict['max']
-        check_call(cmd, shell=True)
+        subprocess.check_call(cmd, shell=True)
 
     def create_filter(self, tc_dict):
 
@@ -109,11 +109,11 @@ class TcDriver(agent_api.AgentInterface):
         cmd += ' match u16 0x12B5 0xFFFF at 22'  # VxLAN port
         cmd += ' match u32 0x%0.6X00 0xFFFFFF00 at 32' % int(vni)
         cmd += ' flowid 1:%s' % tc_dict['child']
-        LOG.debug('creating filter: %s' % cmd)
-        check_call(cmd, shell=True)
+        LOG.debug('creating filter: %s', cmd)
+        subprocess.check_call(cmd, shell=True)
 
     def remove_filter(self, tc_dict):
         cmd = 'sudo tc filter del dev %s ' % self.ports[tc_dict['port_side']]
         cmd += ' parent 1:0 protocol ip prio 1 u32'
         cmd += ' flowid 1:%s' % tc_dict['child']
-        check_call(cmd, shell=True)
+        subprocess.check_call(cmd, shell=True)

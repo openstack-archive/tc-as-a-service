@@ -12,14 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 from neutron.tests import base
 
 from oslo_config import cfg
 
 from wan_qos.agent import tc_driver
-from wan_qos.agent import tc_manager
 from wan_qos.services import plugin
 
 WANTC_group = cfg.OptGroup(name='WANTC',
@@ -146,5 +143,3 @@ class TestApiMessages(base.BaseTestCase):
         cfg.CONF.register_group(WANTC_group)
         cfg.CONF.register_opts(opts, group='WANTC')
         self.plugin = plugin.WanQosPlugin()
-
-

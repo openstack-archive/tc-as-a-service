@@ -15,8 +15,8 @@
 
 import abc
 
-from neutron_lib.api import extensions
 from neutron.api.v2 import resource_helper
+from neutron_lib.api import extensions
 
 from wan_qos.common import constants
 
