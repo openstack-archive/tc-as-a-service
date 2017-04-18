@@ -18,7 +18,7 @@ import sys
 from oslo_config import cfg
 from oslo_service import service
 
-from neutron.agent.common import config
+from neutron.conf.agent import common as config
 from neutron.common import config as common_config
 from neutron import service as neutron_service
 

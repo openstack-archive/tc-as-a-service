@@ -17,8 +17,8 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
 
-from neutron import context as ctx
 from neutron import manager
+from neutron_lib import context as ctx
 from neutron_lib import exceptions
 
 from wan_qos.agent import tc_driver
