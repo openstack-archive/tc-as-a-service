@@ -15,8 +15,8 @@
 
 import threading
 
-from neutron import context as ctx
 from neutron_lib import exceptions
+from neutron_lib import context as ctx
 from oslo_log import log as logging
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
