@@ -1,0 +1,17 @@
+# Python
+*.pyc
+
+# Packages
+.eggs
+*.egg-info
+build/
+dist/
+
+# Testing
+.tox
+.testrepository
+
+# Editors
+*~
+.*.swp
+.*sw?
