@@ -22,4 +22,4 @@ netaddr!=0.7.16,>=0.7.13 # BSD
 six>=1.9.0 # MIT
 httplib2>=0.7.5 # MIT
 WebOb>=1.7.1 # MIT
-
+neutron>=12.0.0  # Apache-2.0
